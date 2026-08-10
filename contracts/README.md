@@ -76,9 +76,10 @@ jq empty contracts/recruiting-agent-g1a-event.schema.json
 python3 contracts/lint_contracts.py
 python3 contracts/lint_g1b_spec.py
 python3 contracts/lint_g2_spec.py
+python3 contracts/lint_g3_spec.py
 ```
 
-`lint_contracts.py` 只用标准库检查 G1a 本地 `$ref`、命令/事件分支覆盖、FR/AT 覆盖、Backlog 引用、链接和 No-go 声明；`lint_g1b_spec.py` 与 `lint_g2_spec.py` 检查对应产品规格、追踪、领域边界和证据限制。三者都**不是** JSON Schema 2020-12 的完整实现，也不证明工程、连接器、模型、法律、用户或发布；完整正反 fixture 仍必须在实现仓库 CI 中使用标准 validator 运行。
+`lint_contracts.py` 只用标准库检查 G1a 本地 `$ref`、命令/事件分支覆盖、FR/AT 覆盖、Backlog 引用、链接和 No-go 声明；`lint_g1b_spec.py`、`lint_g2_spec.py` 与 `lint_g3_spec.py` 检查对应产品规格、追踪、领域边界和证据限制。四者都**不是** JSON Schema 2020-12 的完整实现，也不证明工程、连接器、模型、法律、统计/公平有效性、用户或发布；完整正反 fixture 仍必须在实现仓库 CI 中使用标准 validator 运行。
 
 实现仓库必须增加：
 

@@ -41,7 +41,7 @@ python3 contracts/lint_contracts.py
 | PRD ↔ 矩阵 FR | PASS | 32/32，顺序完整 |
 | PRD ↔ 矩阵 AT | PASS | 15/15，顺序完整 |
 | 矩阵 Backlog 引用 | PASS | 23 个被引用故事均在工程包存在 |
-| 本地 Markdown 链接 | PASS | 38 个，全部位于仓库内且存在 |
+| 本地 Markdown 链接 | PASS | 45 个，全部位于仓库内且存在 |
 | No-go 声明 | PASS | 推进看板与 Gate 0 均保留 |
 
 ## 4. 文件指纹
@@ -51,12 +51,12 @@ python3 contracts/lint_contracts.py
 | `招聘Agent_G1a_工程开工包.md` | `1d982bde4952dc2fdd00b7a2f4ff3272665a71e0dd090d7ff0a74c0731061079` |
 | `contracts/recruiting-agent-g1a-control.schema.json` | `6c0a6c2ba59473eaba62e49aef447a8fc70b87367f72eb6c3c1ab176ca60ee52` |
 | `contracts/recruiting-agent-g1a-event.schema.json` | `2c5cd1bcab087721bc2073ee1bbdb7e1bd65394a63b56dcb1c0e8a21b64716d4` |
-| `contracts/README.md` | `417bf169ab1b0b7e72b1ba848bda09bbb40ed38e9f5b0eef6d44bbb4326d068a` |
+| `contracts/README.md` | `18637b80be4e4eb839cba546ca1e564a27f08b838b0df439e2682605f91cc35d` |
 | `contracts/lint_contracts.py` | `4caba60913037154e6746ed1be3a53e8a719ac20b965b568111266641c959318` |
 | `招聘Agent_G1a_需求追踪矩阵.md` | `f29f73db247231225263f78b9045dea6abdaf35599ef2c813faf96df3236282a` |
-| `招聘Agent_领域与事件规格.md` | `47b282ed9c34b702a512eef7ffaaa6c3b6cd33a649aa642733062e5c0a69e9da` |
-| `招聘Agent推进看板.md` | `6afbaa72b0ba8c6f4de4f6a860c498d22d4ae455284d9eb24a59fe277cc4a30c` |
-| `招聘Agent_Gate0执行包.md` | `f8fb76a985ec6fe877f60350d497cf883bdb8f04aedd0ac6fe115a1f8e0cb869` |
+| `招聘Agent_领域与事件规格.md` | `c0b4fe8deebd0d4eaf449457687a6ced580fe980f166e32503198c2421aa1d1c` |
+| `招聘Agent推进看板.md` | `4a950e9de3ac4f3e78e1883419665dbf44f476ad1932bf244999d5a52848b6e3` |
+| `招聘Agent_Gate0执行包.md` | `44425129601e76c76dcdd0e3a4c48c68271c865aa719ebabb34ab2e3c890e5f4` |
 
 这些指纹只用于确认本次审阅对象；文件后续修改后必须重新运行检查并更新记录。
 

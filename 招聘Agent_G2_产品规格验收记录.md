@@ -4,7 +4,7 @@
 > 验收对象：G2 领域语言、ADR、PRD、领域事件规格、需求追踪、组合看板与 Gate 证据边界  
 > 发布结论：No-go 保持不变
 
-权威输入 SHA-256：9489e0035b69ca6d91c7066c380a5c31b65c06fe58c6277609a8d7cbebd585ed
+权威输入 SHA-256：167794357e28c25fb71492fa2f79d818edb5cbab7bbf23d230b7f501701c9644
 
 ## 1. 权威输入
 
@@ -41,14 +41,14 @@
 | AT 连续与双向覆盖 | 28/28 | PASS（28） | contracts/lint_g2_spec.py |
 | FR→AT 覆盖 | 64 条无孤儿 | PASS（64） | G2 需求追踪矩阵 |
 | 领域词汇 | 16 个 G2 词 | PASS（16） | CONTEXT.md |
-| ADR | 0001..0008 连续；0007/0008 accepted | PASS（8） | docs/adr |
+| ADR | 0001..0009 连续；G2 的 0007/0008 accepted | PASS（9） | docs/adr |
 | G2 聚合/命令/事件 | 必需项为权威表格行、事件行不重复 | PASS（9 聚合、39 命令、39 事件） | 领域与事件规格 |
 | 案件阶段 | 仍为六阶段 | PASS（6） | 领域与事件规格 |
 | 采集/交接/跨聚合 seam | 双路线、失效和四条 event→command seam 显式 | PASS（4 条 seam） | PRD + 领域规格 |
 | 稳定不变量 | 17 个唯一 ID 在 PRD/领域规格一致 | PASS（17） | PRD + 领域规格 |
 | 路线图基线 | 总方案/看板 ROADMAP-RB1 完全一致 | PASS（G1a W3–4；G1b W5–8；G2 W9–16） | 总方案 + 推进看板 |
 | 证据状态 | SPEC=64/28，IMPLEMENTED/VERIFIED/RELEASED=0 | PASS（零实现快照） | G2 需求追踪矩阵 |
-| 本地链接 | 全部为仓库内可移植路径且可解析 | PASS（67） | lint 输出 |
+| 本地链接 | 全部为仓库内可移植路径且可解析 | PASS（81） | lint 输出 |
 | 仓库规格 CI 基线 | commit `c0649ef` 的同组检查在 GitHub runner 通过 | PASS | E-017 / run 31377439927 |
 | 发布结论 | PRD/看板/Gate 均为 No-go | PASS | 三份权威文档 |
 | G1 回归 | G1a/G1b lint 继续通过 | PASS（32/15；40/18） | lint 输出 |

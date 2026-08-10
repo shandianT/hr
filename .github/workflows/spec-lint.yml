@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check Python syntax
-        run: python3 -m py_compile contracts/lint_contracts.py contracts/lint_g1b_spec.py contracts/lint_g2_spec.py
+        run: python3 -m py_compile contracts/lint_contracts.py contracts/lint_g1b_spec.py contracts/lint_g2_spec.py contracts/lint_g3_spec.py
 
       - name: Check JSON syntax
         run: jq empty contracts/*.schema.json
@@ -30,3 +30,6 @@ jobs:
 
       - name: Check G2 product specification
         run: python3 contracts/lint_g2_spec.py
+
+      - name: Check G3 product specification
+        run: python3 contracts/lint_g3_spec.py

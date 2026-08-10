@@ -36,14 +36,14 @@ python3 contracts/lint_g1b_spec.py
 | PRD ↔ 矩阵 FR | PASS | 40/40 |
 | PRD ↔ 矩阵 AT | PASS | 18/18 |
 | G1b 权威领域词 | PASS | 8 个 |
-| ADR 编号与状态 | PASS | 0001..0008 连续；G1b 的 0005/0006 accepted |
+| ADR 编号与状态 | PASS | 0001..0009 连续；G1b 的 0005/0006 accepted |
 | G1b 聚合 | PASS | 3 个核心新增/强化聚合 |
 | G1b 命令 | PASS | 11 个关键命令存在于领域规格 |
 | G1b 事件 | PASS | 13 个关键事件存在于领域规格 |
 | ApplicationCase 阶段 | PASS | 仍为 6 个且顺序一致 |
 | 就绪与人类最终决定分离 | PASS | 4 项文本/命令不变量 |
 | 原型证据边界 | PASS | 正常两轮链存在；17 个场景未被冒充验证 |
-| 本地 Markdown 链接 | PASS | 42 个，全部位于仓库内且存在 |
+| 本地 Markdown 链接 | PASS | 52 个，全部位于仓库内且存在 |
 | No-go 声明 | PASS | PRD、推进看板、Gate 0 三处保留 |
 | 组合计划同步 | PASS | 总方案、看板、Gate 0 均登记 G1b |
 
@@ -51,15 +51,15 @@ python3 contracts/lint_g1b_spec.py
 
 | 文件 | SHA-256 |
 |---|---|
-| `CONTEXT.md` | `926659c27dd9149956dedf3782aa491a111208e0810e70fde2d68696d438018f` |
+| `CONTEXT.md` | `340aedde219439ed8dbd66b262644329a3422ce5b398c73009430cb41b028f38` |
 | `docs/adr/0005-final-assessment-package-is-an-immutable-compilation.md` | `fe0f8f83371f41467d7215293c958bdecca10c86257b35ce2e7918fe267a0561` |
 | `docs/adr/0006-interview-brief-uses-staged-disclosure.md` | `c74253ba22d597ca64d741ad9e1581ea39fd7b42ccec48c70138dfc0381c84ad` |
 | `招聘Agent_G1b_终面评估包_PRD.md` | `715dabe13d70005464bb8628c22e5c466eb3da4625ac1ff94d93b42baa68e294` |
-| `招聘Agent_领域与事件规格.md` | `47b282ed9c34b702a512eef7ffaaa6c3b6cd33a649aa642733062e5c0a69e9da` |
+| `招聘Agent_领域与事件规格.md` | `c0b4fe8deebd0d4eaf449457687a6ced580fe980f166e32503198c2421aa1d1c` |
 | `招聘Agent_G1b_需求追踪矩阵.md` | `cd20ea22e7ad1ace791cd3667a5d5344c3cffb95856415604bc5d61f747cb1a8` |
-| `招聘Agent产品落地总方案.md` | `cdc37768a6cdc22d18b5c58dd3ed84234df30cdc83145a66e1e5ddfe7a0c7e2d` |
-| `招聘Agent推进看板.md` | `6afbaa72b0ba8c6f4de4f6a860c498d22d4ae455284d9eb24a59fe277cc4a30c` |
-| `招聘Agent_Gate0执行包.md` | `f8fb76a985ec6fe877f60350d497cf883bdb8f04aedd0ac6fe115a1f8e0cb869` |
+| `招聘Agent产品落地总方案.md` | `c3ada7062f09ef0fc63003a5a0340118f0aacb18fe98b0fd6f1c4693ee177278` |
+| `招聘Agent推进看板.md` | `4a950e9de3ac4f3e78e1883419665dbf44f476ad1932bf244999d5a52848b6e3` |
+| `招聘Agent_Gate0执行包.md` | `44425129601e76c76dcdd0e3a4c48c68271c865aa719ebabb34ab2e3c890e5f4` |
 | `contracts/lint_g1b_spec.py` | `f3a2e79f81b3e8892dc42751c65c63ba08b36cb9d805f7aaf030b1dc7ffa8d1d` |
 | `docs/招聘Agent_G1b产品规格实施计划.md` | `5a389b6ad2df700932784826aef7ecfff1932c27ad98a25694f54ebfd1344478` |
 

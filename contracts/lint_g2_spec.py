@@ -208,7 +208,7 @@ def main() -> int:
     adr_files = sorted((ROOT / "docs/adr").glob("[0-9][0-9][0-9][0-9]-*.md"))
     adr_numbers = [path.name[:4] for path in adr_files]
     assert adr_numbers == [f"{index:04d}" for index in range(1, len(adr_files) + 1)]
-    assert adr_numbers[-2:] == ["0007", "0008"], "G2 ADRs must be 0007 and 0008"
+    assert adr_numbers[6:8] == ["0007", "0008"], "G2 ADRs must remain 0007 and 0008"
     for path in [ADR_0007, ADR_0008]:
         assert "status: accepted" in read(path), f"ADR not accepted: {path.name}"
     assert "不等于面试预定" in read(ADR_0007)
