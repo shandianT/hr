@@ -1,0 +1,32 @@
+name: spec-lint
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  product-spec-consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Python syntax
+        run: python3 -m py_compile contracts/lint_contracts.py contracts/lint_g1b_spec.py contracts/lint_g2_spec.py
+
+      - name: Check JSON syntax
+        run: jq empty contracts/*.schema.json
+
+      - name: Check G1a contracts and traceability
+        run: python3 contracts/lint_contracts.py
+
+      - name: Check G1b product specification
+        run: python3 contracts/lint_g1b_spec.py
+
+      - name: Check G2 product specification
+        run: python3 contracts/lint_g2_spec.py

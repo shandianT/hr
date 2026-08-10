@@ -3,6 +3,7 @@
 > 验收时间：2026-08-10 15:50（Asia/Singapore）  
 > 验收对象：产品工程规格、机器契约、需求追踪与看板同步  
 > 结论：**结构验收通过；完整 JSON Schema 2020-12 语义验证待实现仓库 CI。真实实现与发布仍为 No-go。**
+> 2026-08-10 17:57：G2 v0.2 语义终审后已重跑 G1a lint，并刷新组合文档指纹；19 命令/24 事件机器契约本身未扩展。
 
 ## 1. 验收范围
 
@@ -40,7 +41,7 @@ python3 contracts/lint_contracts.py
 | PRD ↔ 矩阵 FR | PASS | 32/32，顺序完整 |
 | PRD ↔ 矩阵 AT | PASS | 15/15，顺序完整 |
 | 矩阵 Backlog 引用 | PASS | 23 个被引用故事均在工程包存在 |
-| 本地 Markdown 链接 | PASS | 26 个，全部存在 |
+| 本地 Markdown 链接 | PASS | 39 个，全部存在 |
 | No-go 声明 | PASS | 推进看板与 Gate 0 均保留 |
 
 ## 4. 文件指纹
@@ -50,12 +51,12 @@ python3 contracts/lint_contracts.py
 | `招聘Agent_G1a_工程开工包.md` | `1d982bde4952dc2fdd00b7a2f4ff3272665a71e0dd090d7ff0a74c0731061079` |
 | `contracts/recruiting-agent-g1a-control.schema.json` | `6c0a6c2ba59473eaba62e49aef447a8fc70b87367f72eb6c3c1ab176ca60ee52` |
 | `contracts/recruiting-agent-g1a-event.schema.json` | `2c5cd1bcab087721bc2073ee1bbdb7e1bd65394a63b56dcb1c0e8a21b64716d4` |
-| `contracts/README.md` | `873a80fc182a728c456eb2cd432f7ba1322ca2f1e3e301e1a372d956d1c06f73` |
+| `contracts/README.md` | `417bf169ab1b0b7e72b1ba848bda09bbb40ed38e9f5b0eef6d44bbb4326d068a` |
 | `contracts/lint_contracts.py` | `04e3463921fd7177c29ad9798f36e2216be6159d6773f5eaad739795bcbc359d` |
 | `招聘Agent_G1a_需求追踪矩阵.md` | `f29f73db247231225263f78b9045dea6abdaf35599ef2c813faf96df3236282a` |
-| `招聘Agent_领域与事件规格.md` | `d108cdcaabbaef6cb85b431a385ed2e75759d62e5004f07c7e934e58f6349d75` |
-| `招聘Agent推进看板.md` | `42fd71722946f7e8f5d7870374ac05e53df4459a6dce02a0b20482a49eba7303` |
-| `招聘Agent_Gate0执行包.md` | `d185d1ea399c1d3cebd4ee368a839b77fbe06a20ce10d32ef908036405f58659` |
+| `招聘Agent_领域与事件规格.md` | `47b282ed9c34b702a512eef7ffaaa6c3b6cd33a649aa642733062e5c0a69e9da` |
+| `招聘Agent推进看板.md` | `9ee7b0f584e7e624340880e596864bd674cdd1fd1bd6c02df18ce1d241d06e8d` |
+| `招聘Agent_Gate0执行包.md` | `1620c4f4fb2b9da0881ae15be0f560a08840431a8fe54bf2dd15a260d6b3abea` |
 
 这些指纹只用于确认本次审阅对象；文件后续修改后必须重新运行检查并更新记录。
 

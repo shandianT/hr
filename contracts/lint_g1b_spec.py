@@ -86,10 +86,12 @@ def main() -> int:
 
     adr_files = sorted((ROOT / "docs/adr").glob("[0-9][0-9][0-9][0-9]-*.md"))
     adr_numbers = [path.name[:4] for path in adr_files]
-    assert adr_numbers == [f"{index:04d}" for index in range(1, 7)]
-    for path in adr_files[-2:]:
+    assert adr_numbers == [f"{index:04d}" for index in range(1, len(adr_files) + 1)]
+    g1b_adrs = [path for path in adr_files if path.name.startswith(("0005-", "0006-"))]
+    assert len(g1b_adrs) == 2
+    for path in g1b_adrs:
         assert "status: accepted" in read(path)
-    passed("ADR numbering and accepted status", len(adr_files))
+    passed("ADR numbering is contiguous and G1b decisions remain accepted", len(adr_files))
 
     aggregates = ["InterviewBrief", "CrossRoundIssue", "FinalAssessmentPackage"]
     commands = [
