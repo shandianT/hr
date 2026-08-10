@@ -1,10 +1,10 @@
 # 招聘 Agent G2 产品规格验收记录
 
-> 验收时间：2026-08-10 17:57（Asia/Singapore）  
+> 验收时间：2026-08-10 18:02（Asia/Singapore）  
 > 验收对象：G2 领域语言、ADR、PRD、领域事件规格、需求追踪、组合看板与 Gate 证据边界  
 > 发布结论：No-go 保持不变
 
-权威输入 SHA-256：5b3a7a29631b2e0dc1045f8b0c5d1ab5016e59bd9b30c43b20c2110217f2bea1
+权威输入 SHA-256：882ee24674b654d8b43d23d4300c13949d2460378545e4740911a2ca9566a3bd
 
 ## 1. 权威输入
 
@@ -48,7 +48,7 @@
 | 稳定不变量 | 17 个唯一 ID 在 PRD/领域规格一致 | PASS（17） | PRD + 领域规格 |
 | 路线图基线 | 总方案/看板 ROADMAP-RB1 完全一致 | PASS（G1a W3–4；G1b W5–8；G2 W9–16） | 总方案 + 推进看板 |
 | 证据状态 | SPEC=64/28，IMPLEMENTED/VERIFIED/RELEASED=0 | PASS（零实现快照） | G2 需求追踪矩阵 |
-| 本地链接 | 全部可解析 | PASS（68） | lint 输出 |
+| 本地链接 | 全部为仓库内可移植路径且可解析 | PASS（67） | lint 输出 |
 | 发布结论 | PRD/看板/Gate 均为 No-go | PASS | 三份权威文档 |
 | G1 回归 | G1a/G1b lint 继续通过 | PASS（32/15；40/18） | lint 输出 |
 

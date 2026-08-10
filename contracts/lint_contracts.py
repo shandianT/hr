@@ -60,8 +60,17 @@ def check_links(markdown_path: Path) -> int:
         if not target or target.startswith(("http://", "https://", "mailto:")):
             continue
         candidate = Path(target)
-        if not candidate.is_absolute():
-            candidate = (markdown_path.parent / candidate).resolve()
+        if candidate.is_absolute():
+            raise AssertionError(
+                f"nonportable absolute link in {markdown_path.name}: {raw_target}"
+            )
+        candidate = (markdown_path.parent / candidate).resolve()
+        try:
+            candidate.relative_to(ROOT)
+        except ValueError as exc:
+            raise AssertionError(
+                f"link escapes repository in {markdown_path.name}: {raw_target}"
+            ) from exc
         if not candidate.exists():
             raise AssertionError(f"broken link in {markdown_path.name}: {raw_target}")
         checked += 1
@@ -175,4 +184,3 @@ if __name__ == "__main__":
     except (AssertionError, KeyError, json.JSONDecodeError) as exc:
         print(f"FAIL | {exc}", file=sys.stderr)
         raise SystemExit(1)
-

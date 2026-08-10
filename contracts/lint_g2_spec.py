@@ -84,8 +84,12 @@ def check_links(path: Path) -> int:
         if not target or target.startswith(("http://", "https://", "mailto:")):
             continue
         candidate = Path(target)
-        if not candidate.is_absolute():
-            candidate = (path.parent / candidate).resolve()
+        assert not candidate.is_absolute(), f"nonportable absolute link in {path.name}: {raw}"
+        candidate = (path.parent / candidate).resolve()
+        try:
+            candidate.relative_to(ROOT)
+        except ValueError as exc:
+            raise AssertionError(f"link escapes repository in {path.name}: {raw}") from exc
         assert candidate.exists(), f"broken link in {path.name}: {raw}"
         checked += 1
     return checked
