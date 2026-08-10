@@ -3,7 +3,7 @@
 > 验收时间：2026-08-10 16:05（Asia/Singapore）  
 > 验收对象：G1b 领域语言、关键 ADR、PRD、领域规格、需求追踪和组合看板  
 > 结论：**文档结构与领域一致性验收通过；工程、真人、模型、合规和发布验证尚未开始。**
-> 2026-08-10 18:02 修正仓库外绝对链接并增加可移植链接门后已重跑回归并更新当前文件指纹。
+> 2026-08-10 18:04 登记规格 CI 证据后已重跑回归并更新当前文件指纹。
 
 ## 1. 本次验收证明什么
 
@@ -58,8 +58,8 @@ python3 contracts/lint_g1b_spec.py
 | `招聘Agent_领域与事件规格.md` | `47b282ed9c34b702a512eef7ffaaa6c3b6cd33a649aa642733062e5c0a69e9da` |
 | `招聘Agent_G1b_需求追踪矩阵.md` | `cd20ea22e7ad1ace791cd3667a5d5344c3cffb95856415604bc5d61f747cb1a8` |
 | `招聘Agent产品落地总方案.md` | `cdc37768a6cdc22d18b5c58dd3ed84234df30cdc83145a66e1e5ddfe7a0c7e2d` |
-| `招聘Agent推进看板.md` | `4ea0b83f9e27cf92cbba1ea76ba778811908af7436325a30a33f12910099d672` |
-| `招聘Agent_Gate0执行包.md` | `1620c4f4fb2b9da0881ae15be0f560a08840431a8fe54bf2dd15a260d6b3abea` |
+| `招聘Agent推进看板.md` | `6afbaa72b0ba8c6f4de4f6a860c498d22d4ae455284d9eb24a59fe277cc4a30c` |
+| `招聘Agent_Gate0执行包.md` | `f8fb76a985ec6fe877f60350d497cf883bdb8f04aedd0ac6fe115a1f8e0cb869` |
 | `contracts/lint_g1b_spec.py` | `f3a2e79f81b3e8892dc42751c65c63ba08b36cb9d805f7aaf030b1dc7ffa8d1d` |
 | `docs/招聘Agent_G1b产品规格实施计划.md` | `5a389b6ad2df700932784826aef7ecfff1932c27ad98a25694f54ebfd1344478` |
 

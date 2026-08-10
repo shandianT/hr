@@ -1,10 +1,10 @@
 # 招聘 Agent G2 产品规格验收记录
 
-> 验收时间：2026-08-10 18:02（Asia/Singapore）  
+> 验收时间：2026-08-10 18:04（Asia/Singapore）  
 > 验收对象：G2 领域语言、ADR、PRD、领域事件规格、需求追踪、组合看板与 Gate 证据边界  
 > 发布结论：No-go 保持不变
 
-权威输入 SHA-256：882ee24674b654d8b43d23d4300c13949d2460378545e4740911a2ca9566a3bd
+权威输入 SHA-256：9489e0035b69ca6d91c7066c380a5c31b65c06fe58c6277609a8d7cbebd585ed
 
 ## 1. 权威输入
 
@@ -49,6 +49,7 @@
 | 路线图基线 | 总方案/看板 ROADMAP-RB1 完全一致 | PASS（G1a W3–4；G1b W5–8；G2 W9–16） | 总方案 + 推进看板 |
 | 证据状态 | SPEC=64/28，IMPLEMENTED/VERIFIED/RELEASED=0 | PASS（零实现快照） | G2 需求追踪矩阵 |
 | 本地链接 | 全部为仓库内可移植路径且可解析 | PASS（67） | lint 输出 |
+| 仓库规格 CI 基线 | commit `c0649ef` 的同组检查在 GitHub runner 通过 | PASS | E-017 / run 31377439927 |
 | 发布结论 | PRD/看板/Gate 均为 No-go | PASS | 三份权威文档 |
 | G1 回归 | G1a/G1b lint 继续通过 | PASS（32/15；40/18） | lint 输出 |
 
@@ -59,6 +60,7 @@
 - 部门决定请求与等待阶段原子形成；路由改键纠正不改写 ApplicationKey；ProcessingControl 有明确主体与作用域。
 - 采集请求与 Provider 确认分离；RECORDED_EVIDENCE/AUTHORIZED_NOTES_ONLY 互斥，交接只有在 Session 结束且采集、片段处置和最终对账结算后才能创建，并保留真实采集历史、当前指针、失效与替代生命周期。
 - 多会话轮次在任一必需 Session 开始后进入并保持 IN_PROGRESS；剩余会话仍可继续约面，后续 Booking 不会让 Round 状态回退。
+- 仓库已建立只读 `spec-lint`，commit `c0649ef` 的 Python/JSON 语法与 G1a/G1b/G2 静态一致性检查在 GitHub runner 通过；此证据边界仍是规格，不是运行实现。
 - StartInterview、CreateInterviewEvidenceHandoff 和 FinalAssessmentPackage 失效等跨聚合动作已拆成 event→带版本命令，不再暗示一个事务写两个聚合。
 - 低分不淘汰、招聘决定只来自 HUMAN、旧修订不写当前状态、拒绝录制有等价路线等产品红线已写成稳定不变量。
 - 规格为每条 FR/AT 预留模块、目标测试和未来证据槽，并显式保持零实现、零验证、零发布。

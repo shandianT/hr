@@ -3,7 +3,7 @@
 > 验收时间：2026-08-10 15:50（Asia/Singapore）  
 > 验收对象：产品工程规格、机器契约、需求追踪与看板同步  
 > 结论：**结构验收通过；完整 JSON Schema 2020-12 语义验证待实现仓库 CI。真实实现与发布仍为 No-go。**
-> 2026-08-10 18:02：修正仓库外绝对链接并增加可移植链接门后已重跑 G1a lint，并刷新组合文档指纹；19 命令/24 事件机器契约本身未扩展。
+> 2026-08-10 18:04：登记规格 CI 证据后已重跑 G1a lint，并刷新组合文档指纹；19 命令/24 事件机器契约本身未扩展。
 
 ## 1. 验收范围
 
@@ -55,8 +55,8 @@ python3 contracts/lint_contracts.py
 | `contracts/lint_contracts.py` | `4caba60913037154e6746ed1be3a53e8a719ac20b965b568111266641c959318` |
 | `招聘Agent_G1a_需求追踪矩阵.md` | `f29f73db247231225263f78b9045dea6abdaf35599ef2c813faf96df3236282a` |
 | `招聘Agent_领域与事件规格.md` | `47b282ed9c34b702a512eef7ffaaa6c3b6cd33a649aa642733062e5c0a69e9da` |
-| `招聘Agent推进看板.md` | `4ea0b83f9e27cf92cbba1ea76ba778811908af7436325a30a33f12910099d672` |
-| `招聘Agent_Gate0执行包.md` | `1620c4f4fb2b9da0881ae15be0f560a08840431a8fe54bf2dd15a260d6b3abea` |
+| `招聘Agent推进看板.md` | `6afbaa72b0ba8c6f4de4f6a860c498d22d4ae455284d9eb24a59fe277cc4a30c` |
+| `招聘Agent_Gate0执行包.md` | `f8fb76a985ec6fe877f60350d497cf883bdb8f04aedd0ac6fe115a1f8e0cb869` |
 
 这些指纹只用于确认本次审阅对象；文件后续修改后必须重新运行检查并更新记录。
 
