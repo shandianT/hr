@@ -1,0 +1,832 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:recruiting-agent:g1a:control:1.0.0",
+  "title": "Recruiting Agent G1a control-plane contract",
+  "description": "Technology-neutral write boundary for the single-round post-interview evidence loop. A caller submits intent; only the deterministic control plane may commit state, domain events, or outbox records.",
+  "oneOf": [
+    { "$ref": "#/$defs/CommandEnvelope" },
+    { "$ref": "#/$defs/CommandResult" }
+  ],
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "Reference": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "Sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "AggregateType": {
+      "type": "string",
+      "enum": [
+        "APPLICATION_CASE",
+        "INTERVIEW_ROUND",
+        "INTERVIEW_SESSION",
+        "EVALUATION_PACKAGE",
+        "ACTION_EXECUTION",
+        "EXCEPTION_BUNDLE",
+        "PRIVACY_REQUEST"
+      ]
+    },
+    "TargetRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["aggregate_type", "aggregate_id", "application_case_id"],
+      "properties": {
+        "aggregate_type": { "$ref": "#/$defs/AggregateType" },
+        "aggregate_id": { "$ref": "#/$defs/Identifier" },
+        "application_case_id": { "$ref": "#/$defs/Identifier" },
+        "interview_round_id": { "$ref": "#/$defs/Identifier" },
+        "interview_session_id": { "$ref": "#/$defs/Identifier" }
+      }
+    },
+    "TrustedActorContext": {
+      "type": "object",
+      "description": "Injected by an authenticated transport adapter. A browser or model must never be allowed to choose these values directly.",
+      "additionalProperties": false,
+      "required": ["actor_type", "actor_id", "role", "authority_snapshot_id", "authn_context_id"],
+      "properties": {
+        "actor_type": {
+          "type": "string",
+          "enum": ["HUMAN", "SYSTEM", "SERVICE"]
+        },
+        "actor_id": { "$ref": "#/$defs/Identifier" },
+        "role": {
+          "type": "string",
+          "enum": [
+            "INTERVIEWER",
+            "EVALUATION_OWNER",
+            "RECRUITER",
+            "RECRUITING_OPS_ADMIN",
+            "PRIVACY_ADMIN",
+            "QUALITY_REVIEWER",
+            "WORKFLOW_SERVICE",
+            "EVIDENCE_SERVICE",
+            "CONNECTOR_SERVICE"
+          ]
+        },
+        "authority_snapshot_id": { "$ref": "#/$defs/Identifier" },
+        "authn_context_id": { "$ref": "#/$defs/Identifier" }
+      }
+    },
+    "VersionPin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["object_type", "object_id", "version", "content_hash"],
+      "properties": {
+        "object_type": { "$ref": "#/$defs/Identifier" },
+        "object_id": { "$ref": "#/$defs/Identifier" },
+        "version": { "type": "integer", "minimum": 1 },
+        "content_hash": { "$ref": "#/$defs/Sha256" }
+      }
+    },
+    "ConsentSnapshotRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["participant_id", "purposes", "notice_version", "decision", "valid_at", "receipt_ref"],
+      "properties": {
+        "participant_id": { "$ref": "#/$defs/Identifier" },
+        "purposes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["RECORDING", "TRANSCRIPTION", "EVALUATION_SUPPORT"]
+          }
+        },
+        "notice_version": { "$ref": "#/$defs/Identifier" },
+        "decision": { "const": "GRANTED" },
+        "valid_at": { "type": "string", "format": "date-time" },
+        "receipt_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "CommandType": {
+      "type": "string",
+      "enum": [
+        "RegisterCompletedSessionFact",
+        "ImportCompletedInterview",
+        "RegisterEvidenceArtifact",
+        "RecordTranscriptOutcome",
+        "RecordEvaluationDraftGenerated",
+        "PublishEvaluationForReview",
+        "ReviseEvaluation",
+        "SubmitEvaluationReview",
+        "ReachConfirmationQuorum",
+        "RecordRoundDecision",
+        "RequestReminder",
+        "PauseScope",
+        "ResumeScope",
+        "ResolveException",
+        "RecordParticipantConsentWithdrawal",
+        "RequestDataDeletion",
+        "CompleteDataDeletion",
+        "RequestExternalAction",
+        "RecordExternalActionResult"
+      ]
+    },
+    "CommandEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "command_id",
+        "command_type",
+        "tenant_id",
+        "target",
+        "expected_aggregate_version",
+        "lifecycle_epoch",
+        "idempotency_key",
+        "correlation_id",
+        "requested_at",
+        "actor_context",
+        "payload"
+      ],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "command_id": { "$ref": "#/$defs/Identifier" },
+        "command_type": { "$ref": "#/$defs/CommandType" },
+        "tenant_id": { "$ref": "#/$defs/Identifier" },
+        "target": { "$ref": "#/$defs/TargetRef" },
+        "expected_aggregate_version": { "type": "integer", "minimum": 0 },
+        "lifecycle_epoch": { "type": "integer", "minimum": 1 },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 256
+        },
+        "correlation_id": { "$ref": "#/$defs/Identifier" },
+        "causation_id": { "$ref": "#/$defs/Identifier" },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "actor_context": { "$ref": "#/$defs/TrustedActorContext" },
+        "payload": {}
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "command_type": { "const": "RegisterCompletedSessionFact" },
+                "payload": { "$ref": "#/$defs/RegisterCompletedSessionFactPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "ImportCompletedInterview" },
+                "payload": { "$ref": "#/$defs/ImportCompletedInterviewPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RegisterEvidenceArtifact" },
+                "payload": { "$ref": "#/$defs/RegisterEvidenceArtifactPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RecordTranscriptOutcome" },
+                "payload": { "$ref": "#/$defs/RecordTranscriptOutcomePayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RecordEvaluationDraftGenerated" },
+                "payload": { "$ref": "#/$defs/RecordEvaluationDraftGeneratedPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "PublishEvaluationForReview" },
+                "payload": { "$ref": "#/$defs/PublishEvaluationForReviewPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "ReviseEvaluation" },
+                "payload": { "$ref": "#/$defs/ReviseEvaluationPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "SubmitEvaluationReview" },
+                "payload": { "$ref": "#/$defs/SubmitEvaluationReviewPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "ReachConfirmationQuorum" },
+                "payload": { "$ref": "#/$defs/ReachConfirmationQuorumPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RecordRoundDecision" },
+                "payload": { "$ref": "#/$defs/RecordRoundDecisionPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RequestReminder" },
+                "payload": { "$ref": "#/$defs/RequestReminderPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "PauseScope" },
+                "payload": { "$ref": "#/$defs/PauseScopePayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "ResumeScope" },
+                "payload": { "$ref": "#/$defs/ResumeScopePayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "ResolveException" },
+                "payload": { "$ref": "#/$defs/ResolveExceptionPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RecordParticipantConsentWithdrawal" },
+                "payload": { "$ref": "#/$defs/RecordParticipantConsentWithdrawalPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RequestDataDeletion" },
+                "payload": { "$ref": "#/$defs/RequestDataDeletionPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "CompleteDataDeletion" },
+                "payload": { "$ref": "#/$defs/CompleteDataDeletionPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RequestExternalAction" },
+                "payload": { "$ref": "#/$defs/RequestExternalActionPayload" }
+              }
+            },
+            {
+              "properties": {
+                "command_type": { "const": "RecordExternalActionResult" },
+                "payload": { "$ref": "#/$defs/RecordExternalActionResultPayload" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "RegisterCompletedSessionFactPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interview_round_id",
+        "interview_session_id",
+        "ended_at",
+        "participant_snapshot_ref",
+        "source_system",
+        "source_event_id",
+        "source_resource_version",
+        "observed_start_missing",
+        "occurrence_proof_ref"
+      ],
+      "properties": {
+        "interview_round_id": { "$ref": "#/$defs/Identifier" },
+        "interview_session_id": { "$ref": "#/$defs/Identifier" },
+        "ended_at": { "type": "string", "format": "date-time" },
+        "participant_snapshot_ref": { "$ref": "#/$defs/Reference" },
+        "source_system": { "$ref": "#/$defs/Identifier" },
+        "source_event_id": { "$ref": "#/$defs/Identifier" },
+        "source_resource_version": { "$ref": "#/$defs/Identifier" },
+        "observed_start_missing": { "type": "boolean" },
+        "occurrence_proof_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "ImportCompletedInterviewPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interview_session_id",
+        "scorecard_pin",
+        "evidence_route",
+        "source_artifact_ref",
+        "source_artifact_sha256",
+        "consent_snapshot_refs",
+        "import_reason"
+      ],
+      "properties": {
+        "interview_session_id": { "$ref": "#/$defs/Identifier" },
+        "scorecard_pin": { "$ref": "#/$defs/VersionPin" },
+        "evidence_route": {
+          "type": "string",
+          "enum": ["RECORDING", "NOTES_ONLY"]
+        },
+        "source_artifact_ref": { "$ref": "#/$defs/Reference" },
+        "source_artifact_sha256": { "$ref": "#/$defs/Sha256" },
+        "consent_snapshot_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ConsentSnapshotRef" }
+        },
+        "import_reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        }
+      }
+    },
+    "RegisterEvidenceArtifactPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interview_session_id",
+        "artifact_id",
+        "artifact_type",
+        "artifact_version",
+        "content_ref",
+        "sha256",
+        "source",
+        "processing_purpose",
+        "consent_snapshot_refs",
+        "retention_class"
+      ],
+      "properties": {
+        "interview_session_id": { "$ref": "#/$defs/Identifier" },
+        "artifact_id": { "$ref": "#/$defs/Identifier" },
+        "artifact_type": {
+          "type": "string",
+          "enum": ["RECORDING", "MANUAL_NOTES", "PROVIDER_TRANSCRIPT"]
+        },
+        "artifact_version": { "type": "integer", "minimum": 1 },
+        "content_ref": { "$ref": "#/$defs/Reference" },
+        "sha256": { "$ref": "#/$defs/Sha256" },
+        "source": { "type": "string", "enum": ["PROVIDER", "MANUAL_UPLOAD"] },
+        "uploaded_by_actor_id": { "$ref": "#/$defs/Identifier" },
+        "processing_purpose": { "const": "INTERVIEW_EVALUATION_SUPPORT" },
+        "consent_snapshot_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ConsentSnapshotRef" }
+        },
+        "retention_class": { "$ref": "#/$defs/Identifier" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "source": { "const": "MANUAL_UPLOAD" } } },
+          "then": { "required": ["uploaded_by_actor_id"] }
+        }
+      ]
+    },
+    "QualitySignal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value", "threshold_version"],
+      "properties": {
+        "name": { "$ref": "#/$defs/Identifier" },
+        "value": { "type": "number" },
+        "threshold_version": { "$ref": "#/$defs/Identifier" }
+      }
+    },
+    "RecordTranscriptOutcomePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interview_session_id",
+        "artifact_id",
+        "artifact_version",
+        "run_id",
+        "outcome",
+        "transcript_version",
+        "language",
+        "speaker_map_version",
+        "quality_signals"
+      ],
+      "properties": {
+        "interview_session_id": { "$ref": "#/$defs/Identifier" },
+        "artifact_id": { "$ref": "#/$defs/Identifier" },
+        "artifact_version": { "type": "integer", "minimum": 1 },
+        "run_id": { "$ref": "#/$defs/Identifier" },
+        "outcome": { "type": "string", "enum": ["COMPLETED", "REJECTED"] },
+        "transcript_id": { "$ref": "#/$defs/Identifier" },
+        "transcript_version": { "type": "integer", "minimum": 1 },
+        "segments_ref": { "$ref": "#/$defs/Reference" },
+        "language": { "$ref": "#/$defs/Identifier" },
+        "speaker_map_version": { "type": "integer", "minimum": 1 },
+        "quality_signals": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/QualitySignal" }
+        },
+        "failure_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Identifier" }
+        },
+        "affected_ranges_ref": { "$ref": "#/$defs/Reference" },
+        "retryable": { "type": "boolean" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "outcome": { "const": "COMPLETED" } } },
+          "then": { "required": ["transcript_id", "segments_ref"] },
+          "else": { "required": ["failure_codes", "retryable"] }
+        }
+      ]
+    },
+    "RecordEvaluationDraftGeneratedPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "interview_round_id",
+        "evaluation_id",
+        "evaluation_version",
+        "evidence_set_hash",
+        "scorecard_pin",
+        "profile_pin",
+        "model_version",
+        "prompt_version",
+        "template_version",
+        "draft_ref",
+        "claim_manifest_ref",
+        "critical_claim_count",
+        "supported_critical_claim_count",
+        "decision_fields_present",
+        "tool_execution_count"
+      ],
+      "properties": {
+        "interview_round_id": { "$ref": "#/$defs/Identifier" },
+        "evaluation_id": { "$ref": "#/$defs/Identifier" },
+        "evaluation_version": { "type": "integer", "minimum": 1 },
+        "evidence_set_hash": { "$ref": "#/$defs/Sha256" },
+        "scorecard_pin": { "$ref": "#/$defs/VersionPin" },
+        "profile_pin": { "$ref": "#/$defs/VersionPin" },
+        "model_version": { "$ref": "#/$defs/Identifier" },
+        "prompt_version": { "$ref": "#/$defs/Identifier" },
+        "template_version": { "$ref": "#/$defs/Identifier" },
+        "draft_ref": { "$ref": "#/$defs/Reference" },
+        "claim_manifest_ref": { "$ref": "#/$defs/Reference" },
+        "critical_claim_count": { "type": "integer", "minimum": 0 },
+        "supported_critical_claim_count": { "type": "integer", "minimum": 0 },
+        "decision_fields_present": { "const": false },
+        "tool_execution_count": { "const": 0 }
+      }
+    },
+    "PublishEvaluationForReviewPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evaluation_id",
+        "evaluation_version",
+        "evidence_coverage",
+        "validation_run_ref",
+        "review_policy_ref",
+        "confirmation_owner_id",
+        "due_at"
+      ],
+      "properties": {
+        "evaluation_id": { "$ref": "#/$defs/Identifier" },
+        "evaluation_version": { "type": "integer", "minimum": 1 },
+        "evidence_coverage": { "const": 1 },
+        "validation_run_ref": { "$ref": "#/$defs/Reference" },
+        "review_policy_ref": { "$ref": "#/$defs/Reference" },
+        "confirmation_owner_id": { "$ref": "#/$defs/Identifier" },
+        "due_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ReviseEvaluationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evaluation_id", "based_on_evaluation_version", "edit_diff_ref", "reason"],
+      "properties": {
+        "evaluation_id": { "$ref": "#/$defs/Identifier" },
+        "based_on_evaluation_version": { "type": "integer", "minimum": 1 },
+        "edit_diff_ref": { "$ref": "#/$defs/Reference" },
+        "evidence_feedback_ref": { "$ref": "#/$defs/Reference" },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 500 }
+      }
+    },
+    "SubmitEvaluationReviewPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_id", "evaluation_id", "evaluation_version", "disposition"],
+      "properties": {
+        "review_id": { "$ref": "#/$defs/Identifier" },
+        "evaluation_id": { "$ref": "#/$defs/Identifier" },
+        "evaluation_version": { "type": "integer", "minimum": 1 },
+        "disposition": {
+          "type": "string",
+          "enum": ["CONFIRM", "REQUEST_CHANGES", "REPORT_PROBLEM"]
+        },
+        "comment_ref": { "$ref": "#/$defs/Reference" },
+        "evidence_feedback_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "ReachConfirmationQuorumPayload": {
+      "type": "object",
+      "description": "Internal workflow command emitted only after the review policy is evaluated; it is not a UI shortcut.",
+      "additionalProperties": false,
+      "required": ["evaluation_id", "evaluation_version", "confirmation_ids", "review_policy_ref"],
+      "properties": {
+        "evaluation_id": { "$ref": "#/$defs/Identifier" },
+        "evaluation_version": { "type": "integer", "minimum": 1 },
+        "confirmation_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Identifier" }
+        },
+        "review_policy_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "RecordRoundDecisionPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "decision_type",
+        "evaluation_id",
+        "evaluation_version",
+        "decision_basis_ref",
+        "submitted_at"
+      ],
+      "properties": {
+        "decision_id": { "$ref": "#/$defs/Identifier" },
+        "decision_type": {
+          "type": "string",
+          "enum": ["ADVANCE_TO_NEXT", "REPEAT_ROUND", "STOP_PROCESS", "FINAL_ROUND_COMPLETE"]
+        },
+        "evaluation_id": { "$ref": "#/$defs/Identifier" },
+        "evaluation_version": { "type": "integer", "minimum": 1 },
+        "decision_basis_ref": { "$ref": "#/$defs/Reference" },
+        "submitted_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "RequestReminderPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_id",
+        "reminder_policy_version",
+        "reminder_ordinal",
+        "recipient_ref",
+        "channel",
+        "due_at",
+        "safe_deep_link_ref"
+      ],
+      "properties": {
+        "request_id": { "$ref": "#/$defs/Identifier" },
+        "reminder_policy_version": { "$ref": "#/$defs/Identifier" },
+        "reminder_ordinal": { "type": "integer", "minimum": 1 },
+        "recipient_ref": { "$ref": "#/$defs/Reference" },
+        "channel": { "type": "string", "enum": ["PRODUCT_INBOX", "IM", "EMAIL"] },
+        "due_at": { "type": "string", "format": "date-time" },
+        "safe_deep_link_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "PauseScopePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type", "scope_id", "reason_code", "cancellation_token", "effective_at"],
+      "properties": {
+        "scope_type": { "type": "string", "enum": ["TENANT", "REQUISITION", "APPLICATION_CASE"] },
+        "scope_id": { "$ref": "#/$defs/Identifier" },
+        "reason_code": { "$ref": "#/$defs/Identifier" },
+        "cancellation_token": { "$ref": "#/$defs/Identifier" },
+        "effective_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "ResumeScopePayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope_type", "scope_id", "reason", "resume_token"],
+      "properties": {
+        "scope_type": { "type": "string", "enum": ["TENANT", "REQUISITION", "APPLICATION_CASE"] },
+        "scope_id": { "$ref": "#/$defs/Identifier" },
+        "reason": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "resume_token": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "ResolveExceptionPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exception_id", "resolution_id", "selected_option", "resume_token"],
+      "properties": {
+        "exception_id": { "$ref": "#/$defs/Identifier" },
+        "resolution_id": { "$ref": "#/$defs/Identifier" },
+        "selected_option": { "$ref": "#/$defs/Identifier" },
+        "supplied_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Reference" }
+        },
+        "resume_token": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "RecordParticipantConsentWithdrawalPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["participant_id", "purposes", "effective_at", "receipt_ref"],
+      "properties": {
+        "participant_id": { "$ref": "#/$defs/Identifier" },
+        "purposes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["RECORDING", "TRANSCRIPTION", "EVALUATION_SUPPORT"]
+          }
+        },
+        "effective_at": { "type": "string", "format": "date-time" },
+        "receipt_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "RequestDataDeletionPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["privacy_request_id", "subject_ref", "scope_refs", "requested_at", "verified_request_ref"],
+      "properties": {
+        "privacy_request_id": { "$ref": "#/$defs/Identifier" },
+        "subject_ref": { "$ref": "#/$defs/Reference" },
+        "scope_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Reference" }
+        },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "verified_request_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "CompleteDataDeletionPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["privacy_request_id", "lineage_run_ref", "completion_receipt_ref", "completed_at"],
+      "properties": {
+        "privacy_request_id": { "$ref": "#/$defs/Identifier" },
+        "lineage_run_ref": { "$ref": "#/$defs/Reference" },
+        "completion_receipt_ref": { "$ref": "#/$defs/Reference" },
+        "retained_item_manifest_ref": { "$ref": "#/$defs/Reference" },
+        "completed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "RequestExternalActionPayload": {
+      "type": "object",
+      "description": "Internal-only command. The model and browser have no authority to submit it directly.",
+      "additionalProperties": false,
+      "required": [
+        "action_id",
+        "action_type",
+        "target_ref",
+        "business_revision",
+        "payload_ref",
+        "payload_hash",
+        "risk_class"
+      ],
+      "properties": {
+        "action_id": { "$ref": "#/$defs/Identifier" },
+        "action_type": {
+          "type": "string",
+          "enum": ["DELIVER_CONFIRMATION_TASK", "SEND_REMINDER", "DELETE_DERIVED_DATA"]
+        },
+        "target_ref": { "$ref": "#/$defs/Reference" },
+        "business_revision": { "$ref": "#/$defs/Identifier" },
+        "payload_ref": { "$ref": "#/$defs/Reference" },
+        "payload_hash": { "$ref": "#/$defs/Sha256" },
+        "risk_class": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "RED"] }
+      }
+    },
+    "RecordExternalActionResultPayload": {
+      "type": "object",
+      "description": "Connector-result command admitted only from a connector service identity.",
+      "additionalProperties": false,
+      "required": ["action_id", "attempt_no", "outcome", "observed_at"],
+      "properties": {
+        "action_id": { "$ref": "#/$defs/Identifier" },
+        "attempt_no": { "type": "integer", "minimum": 1 },
+        "outcome": { "type": "string", "enum": ["SUCCEEDED", "FAILED", "CANCELLED"] },
+        "connector_receipt_ref": { "$ref": "#/$defs/Reference" },
+        "external_resource_ref": { "$ref": "#/$defs/Reference" },
+        "error_code": { "$ref": "#/$defs/Identifier" },
+        "retryable": { "type": "boolean" },
+        "observed_at": { "type": "string", "format": "date-time" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "outcome": { "const": "SUCCEEDED" } } },
+          "then": { "required": ["connector_receipt_ref"] },
+          "else": { "required": ["error_code", "retryable"] }
+        }
+      ]
+    },
+    "CommandStatus": {
+      "type": "string",
+      "enum": ["APPLIED", "REPLAYED", "REJECTED", "IGNORED_STALE"]
+    },
+    "ErrorCode": {
+      "type": "string",
+      "enum": [
+        "SCHEMA_INVALID",
+        "AUTHORIZATION_DENIED",
+        "VERSION_CONFLICT",
+        "IDEMPOTENCY_KEY_REUSED",
+        "LIFECYCLE_EPOCH_MISMATCH",
+        "CASE_NOT_PROCESSABLE",
+        "CASE_PAUSED_OR_CLOSED",
+        "DELETION_IN_PROGRESS",
+        "POLICY_DENIED",
+        "REFERENCE_SCOPE_MISMATCH",
+        "INVALID_TRANSITION",
+        "BINDING_NOT_FOUND",
+        "BINDING_AMBIGUOUS",
+        "CONSENT_MISSING",
+        "CONSENT_REVOKED",
+        "ARTIFACT_ALREADY_BOUND",
+        "MEDIA_UNREADABLE",
+        "AUDIO_LOW_QUALITY",
+        "SPEAKER_UNCERTAIN",
+        "SCORECARD_MISSING",
+        "EVIDENCE_VALIDATION_FAILED",
+        "PROHIBITED_FEATURE_DETECTED",
+        "DECISION_REQUIRES_HUMAN",
+        "EVALUATION_VERSION_STALE",
+        "RESUME_TOKEN_INVALID",
+        "EXTERNAL_REVISION_STALE",
+        "MODEL_UNAVAILABLE",
+        "RETRY_EXHAUSTED"
+      ]
+    },
+    "CommandError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "retryable", "message_key"],
+      "properties": {
+        "code": { "$ref": "#/$defs/ErrorCode" },
+        "retryable": { "type": "boolean" },
+        "message_key": { "$ref": "#/$defs/Identifier" },
+        "current_aggregate_version": { "type": "integer", "minimum": 0 },
+        "exception_bundle_id": { "$ref": "#/$defs/Identifier" },
+        "details_ref": { "$ref": "#/$defs/Reference" }
+      }
+    },
+    "CommandResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "command_id",
+        "status",
+        "tenant_id",
+        "target",
+        "lifecycle_epoch",
+        "completed_at",
+        "trace_id"
+      ],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "command_id": { "$ref": "#/$defs/Identifier" },
+        "status": { "$ref": "#/$defs/CommandStatus" },
+        "tenant_id": { "$ref": "#/$defs/Identifier" },
+        "target": { "$ref": "#/$defs/TargetRef" },
+        "aggregate_version": { "type": "integer", "minimum": 0 },
+        "lifecycle_epoch": { "type": "integer", "minimum": 1 },
+        "emitted_event_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Identifier" }
+        },
+        "requested_action_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/Identifier" }
+        },
+        "replayed_of_command_id": { "$ref": "#/$defs/Identifier" },
+        "error": { "$ref": "#/$defs/CommandError" },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "trace_id": { "$ref": "#/$defs/Identifier" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "REJECTED" } } },
+          "then": { "required": ["error"] },
+          "else": { "required": ["aggregate_version", "emitted_event_ids", "requested_action_ids"] }
+        },
+        {
+          "if": { "properties": { "status": { "const": "REPLAYED" } } },
+          "then": { "required": ["replayed_of_command_id"] }
+        }
+      ]
+    }
+  }
+}

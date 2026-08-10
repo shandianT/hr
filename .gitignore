@@ -1,0 +1,5 @@
+.DS_Store
+.learnings/
+__pycache__/
+*.py[cod]
+
