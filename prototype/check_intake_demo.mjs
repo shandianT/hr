@@ -7,6 +7,10 @@ const scriptMatch = source.match(/<script>([\s\S]*)<\/script>/);
 if (!scriptMatch) throw new Error("intake demo script is missing");
 new Function(scriptMatch[1]);
 
+if (!source.includes("进入核心功能 2") || !source.includes("招聘Agent_核心功能2_画像匹配与部门决定Demo.html")) {
+  throw new Error("intake completion must hand off to core feature 2");
+}
+
 for (const requiredToken of [
   "一份附件，先证明来源、文件、身份和申请范围",
   "演示输入，不是 HR 的日常触发",

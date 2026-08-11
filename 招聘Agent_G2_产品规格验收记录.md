@@ -4,7 +4,7 @@
 > 验收对象：G2 领域语言、ADR、PRD、领域事件规格、需求追踪、组合看板与 Gate 证据边界  
 > 发布结论：No-go 保持不变
 
-权威输入 SHA-256：0250015b9da4abd9af350185aa20bf8c23dac1f6d4067f3fca107ad6d99ab210
+权威输入 SHA-256：062521eb18c7547798ff1b3d32f3928b3124c26f8feafa1cbf1bef6ab691817a
 
 ## 1. 权威输入
 

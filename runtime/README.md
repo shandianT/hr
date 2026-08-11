@@ -2,7 +2,7 @@
 
 状态：`IMPLEMENTED / SYNTHETIC_ONLY` 候选；尚未形成目标环境验证或发布证据。
 
-本目录目前包含两条彼此隔离、但可由后续案件控制塔串联的可执行纵切。
+本目录目前包含三条边界明确的可执行纵切：核心功能 1 负责 Case 出现前的收件与开案，核心功能 2 复用同一 Case 执行画像匹配和部门决定，G1a 负责面后证据到轮次归档。
 
 ## 核心功能 1：简历收件到自动开案
 
@@ -38,6 +38,47 @@ intake.read(projection_request) -> intake_projection
 - 当前读写授权是精确的合成 fixture grant，用来证明门的行为形状，不冒充生产身份网关。
 
 该切片仍不接真实邮箱、ATS、文件扫描或模型，也没有实现多附件拆人、已开案改键纠正、删除传播、生产身份网关或并发多节点验证。因此它只支持当前行为子集的 `IMPLEMENTED / SYNTHETIC_ONLY`，不能把整个 FR-201..218 或 AT-201..205 升为已完成。
+
+## 核心功能 2：画像匹配与部门决定
+
+`recruiting_screening` 在核心功能 1 建立的同一权威 `ApplicationCase.RECEIVED` 上继续：
+
+> 钉住结构化简历/已发布画像/允许字段/策略 → 四态证据匹配 → 发布门 → 唯一权威部门任务 → 合成通知与有限催办 → 授权 HUMAN 决定
+
+公共接口仍只有：
+
+```python
+screening.submit(command_envelope) -> command_result
+screening.read(projection_request) -> screening_projection
+```
+
+当前实现九类命令：
+
+- `PinScreeningInput`
+- `PublishMatchAssessment`
+- `OpenDepartmentDecisionRequest`
+- `QueueDepartmentDelivery`
+- `ExecuteSyntheticDelivery`
+- `AdvanceReminderOrdinal`
+- `RecordDepartmentDecision`
+- `ResumeDepartmentDecisionRequest`
+- `InvalidateCurrentMatchAssessment`
+
+已锁定的精确合成行为包括：
+
+- 筛选输入钉住当前简历、ACTIVE 画像发布修订/安全纪元、允许字段和服务端当前策略/生成器；旧版本、非 ACTIVE 画像、旧策略与保护字段钉住被拒绝。
+- `MatchAssessment` 按维度保留 `SUPPORT / COUNTER_EVIDENCE / UNKNOWN / NOT_APPLICABLE` 和证据 locator；低匹配或未知仍建立人审任务，不自动淘汰或发拒信。
+- 发布门阻断缺维度、伪造/缺失 locator/hash、中英文保护或明显代理字段、中英文提示注入、决定与排名字段；畸形嵌套输入返回结构化拒绝，不抛出运行时异常。
+- Case 同时只有一个当前筛选清单、匹配材料指针和权威 `DepartmentDecisionRequest`；合成通知是 `ActionExecution`，不是第二个决定任务。
+- `RecordDepartmentDecision` 只接受当前授权 `HIRING_OWNER` HUMAN、当前 request/material/Owner/authority/lifecycle；Service、Agent、旧卡、旧 Owner 或双击不产生第二决定。
+- `INVITE` 推进到 `INTERVIEWING`；`REJECT` 关闭 Case 但不隐式发拒信；`HOLD` 停催并产生新 `ON_HOLD` revision，到期只恢复新 `OPEN` revision/generation，不替人决定。
+- 材料因果输入变化会在同一 Case 事务撤销当前指针/请求并使旧动作失效，Case 回到 `SCREENING`。
+- 新结构化简历附加到同一 Case 时会同时失效当前筛选输入与负责人任务；Case 只允许钉住当前结构化简历，旧简历、旧卡或旧排队动作都不能在新请求下复活。
+- `SCREENING_WORKFLOW`、`MATCH_GENERATOR` 与 `DELIVERY_WORKER` 只读取当前案件和各自用途所需的最小视图；自动化场景不借用 HUMAN 的全租户投影来构造 Service 命令。
+- 催办重验静默时段、request revision、generation 与 ordinal，最多两次；上一条合成提醒没有送达回执时不能继续授权下一 ordinal 或上报。耗尽后只建一个异常包，决定后迟到催办被阻断。临时送达失败可在当前 request 下有限重试并以动作版本结算，耗尽后形成动作级异常包。
+- 错误/跨租户收件人在 action 建立前被拒绝；所有通知/催办回执都是合成数据，`real_external_effect_count=0`。
+
+34 条专项行为测试已本地通过；当前全 runtime 快照为 105 / 105 通过。该切片仍不证明真实匹配模型、IM/邮件、IAM、独立持久化的 Owner/错误收件人异常接管、分布式 worker/并发、拒信、日历约面、真人或法务已可用。它只支持精确行为子集的 `IMPLEMENTED / SYNTHETIC_ONLY`；G2 需求追踪矩阵继续保持 `SPEC`。
 
 ## G1a：面试证据到轮次归档
 
@@ -115,6 +156,7 @@ Runner 只能提交自动化 `SERVICE` 命令。任何带 `HUMAN` actor 的确�
 ```bash
 python3 -m unittest discover -s runtime/tests -v
 python3 runtime/run_synthetic_intake.py
+python3 runtime/run_synthetic_screening.py
 python3 runtime/run_synthetic_g1a.py
 ```
 

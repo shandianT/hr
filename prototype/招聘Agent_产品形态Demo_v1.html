@@ -292,7 +292,7 @@
     ];
     const stages = [
       { key: 'intake', label: '简历收件', detail: '完成安全检查、解析、去重与唯一申请路由', action: '读取附件并生成带原文定位的结构化简历版本', wait: '无', next: '唯一开案后运行画像匹配', eta: '16 秒' },
-      { key: 'match', label: '画像匹配', detail: '给出 86 分匹配与可追溯证据', action: '对照岗位画像标记经验、能力与风险', wait: '无', next: '推送用人部门', eta: '28 秒' },
+      { key: 'match', label: '画像匹配', detail: '整理支持、反证与未知，并保留可追溯证据', action: '对照当前画像逐维整理证据，不生成排名或招聘建议', wait: '无', next: '发布材料并创建唯一部门任务', eta: '28 秒' },
       { key: 'department', label: '部门筛选', detail: '用人负责人做唯一推进决定', action: '推送摘要、证据与风险提示，按 SLA 催反馈', wait: '用人负责人 · 周岩', next: '获得推进 / 暂缓 / 结束决定', eta: '2 小时 SLA', human: true },
       { key: 'schedule', label: '各轮自动约面', detail: '一面 / 二面 / 终面逐轮读忙闲、发时段、创建含录制告知的会议邀请', action: '协调候选人与当轮面试官的可用时段，并准备录制告知与等价无录制路线', wait: '候选人选时', next: '二次校验时段后建会', eta: '8 分钟' },
       { key: 'brief', label: '各轮面试准备', detail: '每轮面试前自动生成追问清单，同时带入上轮证据缺口', action: '结合画像、简历与已有轮次生成当轮面试简报', wait: '无', next: '会前 30 分钟推送面试官', eta: '会前 30 分' },
@@ -311,7 +311,7 @@
       calendar: { route: 'PROPOSAL REV-2 · 旧时段未建会', checkpoint: 'SCHEDULE-R3 / REV-2', note: '已作废过期时段，重新读取忙闲，只会对新修订提案建会。' },
       overdue: { route: 'EXCEPTION BUNDLE · 升级招聘运营', checkpoint: 'DEPARTMENT-DECISION / GEN-3', note: '同一事实包只升级一次，包含影响、已尝试动作与可选处置。' }
     };
-    const capability = ['简历收件（可运行合成内核）', '简历解析（合成）', '画像匹配（模拟）', '日历与会议（模拟）', '评估编译（可运行内核）'];
+    const capability = ['简历收件（可运行合成内核）', '简历解析（合成）', '画像匹配与部门决定（可运行合成内核）', '日历与会议（模拟）', '评估编译（可运行内核）'];
     const state = {
       step: 0,
       scenario: 'normal',
@@ -370,7 +370,8 @@
       const isHuman = stages[state.step].human && !info.blocked;
       const done = state.step === stages.length - 1;
       return `
-        <a class="btn ${accent ? 'primary' : ''}" href="./招聘Agent_核心功能1_简历收件Demo.html" target="_blank" rel="noopener">体验简历收件</a>
+        <a class="btn" href="./招聘Agent_核心功能1_简历收件Demo.html" target="_blank" rel="noopener">核心 1 · 简历收件</a>
+        <a class="btn ${accent ? 'primary' : ''}" href="./招聘Agent_核心功能2_画像匹配与部门决定Demo.html" target="_blank" rel="noopener">核心 2 · 部门决定</a>
         <select class="scenario-select" data-action="scenario" aria-label="选择演示场景">${scenarioOptions()}</select>
         <button class="btn ${accent ? 'accent' : 'primary'}" data-action="${done ? 'open-package' : 'advance'}" ${isHuman || info.blocked ? 'disabled' : ''}>${done ? '打开终面评估包' : '推进一步'}</button>
         <button class="btn" data-action="auto" ${done ? 'disabled' : ''}>${state.auto ? '停止自动' : '自动演示'}</button>
@@ -411,7 +412,7 @@
         : '<li>本次预览未记录人工决定</li>';
       return `<div class="package-backdrop"><article class="package-modal" role="dialog" aria-modal="true" aria-labelledby="package-title">
         <header class="package-top"><div><div class="eyebrow" style="color:#aeb6b1">合成样例 · FINAL ASSESSMENT PACKAGE / REV ${state.evaluationRevision}</div><h2 id="package-title">林可欣 — AI 产品经理</h2></div><button class="btn tiny" data-action="close-package">关闭</button></header>
-        <div class="package-body"><section class="package-summary"><div><div class="eyebrow">终面评审摘要</div><div class="package-lead" style="margin-top:8px">可进入最终招聘决策会；建议人工重点权衡商业化结果的可验证性。</div><p class="small">这是评估准备产物，不是录用或淘汰决定。最终招聘决定仍由有权人员作出。</p></div><div class="package-facts"><div class="package-fact"><div class="eyebrow">画像匹配</div><b>86 / 100 · v3</b></div><div class="package-fact"><div class="eyebrow">证据引用</div><b>12 条可定位</b></div><div class="package-fact"><div class="eyebrow">面试轮次</div><b>3 / 3 已确认</b></div><div class="package-fact"><div class="eyebrow">未解问题</div><b>2 项</b></div></div></section>
+        <div class="package-body"><section class="package-summary"><div><div class="eyebrow">终面评审摘要</div><div class="package-lead" style="margin-top:8px">可进入最终招聘决策会；建议人工重点权衡商业化结果的可验证性。</div><p class="small">这是评估准备产物，不是录用或淘汰决定。最终招聘决定仍由有权人员作出。</p></div><div class="package-facts"><div class="package-fact"><div class="eyebrow">画像材料</div><b>支持 / 反证 / 未知 · v3</b></div><div class="package-fact"><div class="eyebrow">证据引用</div><b>12 条可定位</b></div><div class="package-fact"><div class="eyebrow">面试轮次</div><b>3 / 3 已确认</b></div><div class="package-fact"><div class="eyebrow">未解问题</div><b>2 项</b></div></div></section>
         <section class="package-section"><h3>各轮结论与证据地图</h3><table class="round-table"><thead><tr><th>轮次</th><th>核心结论</th><th>证据</th><th>风险 / 追问</th><th>确认</th></tr></thead><tbody>
           <tr><td><b>一面</b><br>业务面</td><td>能将模糊需求拆成可验证路径，跨团队推进证据完整。</td><td><span class="evidence-ref">R1-E03</span> <span class="evidence-ref">CV-P12</span></td><td>继续核验产品结果与个人贡献的边界。</td><td>王楠 · 14:08</td></tr>
           <tr><td><b>二面</b><br>专业面</td><td>AI 产品化方法扎实，能说明评测、灰度和失效降级。</td><td><span class="evidence-ref">R2-E02</span> <span class="evidence-ref">R2-E08</span></td><td>模型质量指标定义仍需结合真实业务核对。</td><td>李博 · 11:42</td></tr>
@@ -433,7 +434,7 @@
         </aside>
         <section class="a-main"><header class="a-top"><div><div class="eyebrow">招聘运营 / 当前案件</div><div class="strong" style="margin-top:5px">一个页面看清 Agent 到了哪、在等谁、将交付什么</div></div><div class="pill ${info.class}"><span class="dot"></span>${info.label}</div></header>
           <main class="a-body"><div class="candidate-head"><div class="candidate-id"><div class="avatar">林</div><div><div class="candidate-name">林可欣</div><div class="small">AI 产品经理 · 上海 · 申请编号 AP-24081</div></div></div><div class="head-actions">${commonControls(true)}</div></div>
-          <div class="metric-strip"><div class="metric"><div class="eyebrow">完成进度</div><div class="metric-value">${progress()}%</div></div><div class="metric"><div class="eyebrow">画像匹配</div><div class="metric-value">86 <span class="small">/ 100</span></div></div><div class="metric"><div class="eyebrow">非计划 HR 触发</div><div class="metric-value">0 <span class="small">次</span></div></div><div class="metric"><div class="eyebrow">当前 SLA</div><div class="metric-value">${st.human ? st.eta : '正常'}</div></div></div>
+          <div class="metric-strip"><div class="metric"><div class="eyebrow">完成进度</div><div class="metric-value">${progress()}%</div></div><div class="metric"><div class="eyebrow">画像材料</div><div class="metric-value">4 <span class="small">支持 · 2 未知</span></div></div><div class="metric"><div class="eyebrow">非计划 HR 触发</div><div class="metric-value">0 <span class="small">次</span></div></div><div class="metric"><div class="eyebrow">当前 SLA</div><div class="metric-value">${st.human ? st.eta : '正常'}</div></div></div>
           <div class="a-grid"><section class="card journey-card"><div class="card-head"><div><div class="card-title">候选人中段旅程</div><div class="small">从简历收件到终面评估包</div></div><span class="pill blue">${state.step + 1} / ${stages.length}</span></div><div class="progress-line"><i style="width:${progress()}%"></i></div>${roundRibbon()}<div class="timeline">${stageRows()}</div></section>
           <aside class="card agent-panel"><div class="agent-now"><div class="eyebrow">Agent 运行信封</div><div class="agent-state"><h3>${info.label}</h3><span class="pill ${info.class}">${st.label}</span></div><div class="thinking">${st.action}。所有外部动作都在执行前重新校验收件人、版本和当前控制状态。</div></div><div class="rail-list"><div class="rail-item"><div class="rail-k">等待对象</div><div class="rail-v">${st.wait}</div></div><div class="rail-item"><div class="rail-k">下一动作</div><div class="rail-v">${st.next}</div></div><div class="rail-item"><div class="rail-k">最晚升级</div><div class="rail-v">${st.human ? '距现在 ' + st.eta : '暂无需升级'}</div></div><div class="rail-item"><div class="rail-k">执行范围</div><div class="rail-v">只处理案件 AP-24081 · Epoch 1</div></div></div>${decisionBox()}</aside>
           <section class="card output-card"><div class="card-head" style="padding:0 0 12px;border:0"><div><div class="card-title">最终交付件预览</div><div class="small">只有证据与必要人工确认齐备后才可就绪</div></div><span class="pill ${state.step === 7 ? 'good' : ''}">${state.step === 7 ? '已就绪' : '编译中'}</span>${state.step === 7 ? '<button class="btn primary tiny" data-action="open-package">打开正文</button>' : ''}</div><div class="output-grid"><div class="output-block ${state.step === 7 ? 'ready' : ''}"><div class="eyebrow">终面评估摘要</div><div class="strong" style="margin-top:7px">建议重点验证复杂项目商业化与跨团队推进能力</div></div><div class="output-block"><div class="eyebrow">证据</div><div class="strong" style="margin-top:7px">12 条可定位引用</div></div><div class="output-block"><div class="eyebrow">风险</div><div class="strong" style="margin-top:7px">2 项待终面验证</div></div><div class="output-block"><div class="eyebrow">人工确认</div><div class="strong" style="margin-top:7px">${state.step > 6 ? '2 / 2' : state.step > 2 ? '1 / 2' : '0 / 2'}</div></div></div></section></div></main></section></div>`;

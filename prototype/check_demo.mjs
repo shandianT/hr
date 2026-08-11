@@ -28,9 +28,17 @@ for (const requiredToken of [
   "返回 Hiring Owner 决策",
   "FINAL ASSESSMENT PACKAGE / REV ${state.evaluationRevision}",
   "state.recovery.acknowledged=true",
+  "核心 2 · 部门决定",
+  "支持 / 反证 / 未知 · v3",
 ]) {
   if (!source.includes(requiredToken)) {
     throw new Error(`prototype token is missing: ${requiredToken}`);
+  }
+}
+
+for (const forbiddenToken of ["给出 86 分匹配", "86 / 100"]) {
+  if (source.includes(forbiddenToken)) {
+    throw new Error(`prototype contains forbidden ranking copy: ${forbiddenToken}`);
   }
 }
 
