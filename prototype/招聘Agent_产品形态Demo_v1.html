@@ -51,6 +51,7 @@
     .btn {
       border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px;
       min-height: 38px; padding: 8px 13px; font-weight: 680; transition: transform .14s ease, background .14s ease;
+      display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
     }
     .btn:hover { transform: translateY(-1px); background: #f2f3ef; }
     .btn.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
@@ -290,7 +291,7 @@
       { key: 'C', name: '运营工作台' }
     ];
     const stages = [
-      { key: 'intake', label: '简历收件', detail: '完成解析、去重与应聘岗位归档', action: '读取附件并生成结构化候选人档案', wait: '无', next: '运行画像匹配', eta: '16 秒' },
+      { key: 'intake', label: '简历收件', detail: '完成安全检查、解析、去重与唯一申请路由', action: '读取附件并生成带原文定位的结构化简历版本', wait: '无', next: '唯一开案后运行画像匹配', eta: '16 秒' },
       { key: 'match', label: '画像匹配', detail: '给出 86 分匹配与可追溯证据', action: '对照岗位画像标记经验、能力与风险', wait: '无', next: '推送用人部门', eta: '28 秒' },
       { key: 'department', label: '部门筛选', detail: '用人负责人做唯一推进决定', action: '推送摘要、证据与风险提示，按 SLA 催反馈', wait: '用人负责人 · 周岩', next: '获得推进 / 暂缓 / 结束决定', eta: '2 小时 SLA', human: true },
       { key: 'schedule', label: '各轮自动约面', detail: '一面 / 二面 / 终面逐轮读忙闲、发时段、创建含录制告知的会议邀请', action: '协调候选人与当轮面试官的可用时段，并准备录制告知与等价无录制路线', wait: '候选人选时', next: '二次校验时段后建会', eta: '8 分钟' },
@@ -310,7 +311,7 @@
       calendar: { route: 'PROPOSAL REV-2 · 旧时段未建会', checkpoint: 'SCHEDULE-R3 / REV-2', note: '已作废过期时段，重新读取忙闲，只会对新修订提案建会。' },
       overdue: { route: 'EXCEPTION BUNDLE · 升级招聘运营', checkpoint: 'DEPARTMENT-DECISION / GEN-3', note: '同一事实包只升级一次，包含影响、已尝试动作与可选处置。' }
     };
-    const capability = ['邮箱收件（模拟）', '简历解析（模拟）', '画像匹配（模拟）', '日历与会议（模拟）', '评估编译（可运行内核）'];
+    const capability = ['简历收件（可运行合成内核）', '简历解析（合成）', '画像匹配（模拟）', '日历与会议（模拟）', '评估编译（可运行内核）'];
     const state = {
       step: 0,
       scenario: 'normal',
@@ -369,6 +370,7 @@
       const isHuman = stages[state.step].human && !info.blocked;
       const done = state.step === stages.length - 1;
       return `
+        <a class="btn ${accent ? 'primary' : ''}" href="./招聘Agent_核心功能1_简历收件Demo.html" target="_blank" rel="noopener">体验简历收件</a>
         <select class="scenario-select" data-action="scenario" aria-label="选择演示场景">${scenarioOptions()}</select>
         <button class="btn ${accent ? 'accent' : 'primary'}" data-action="${done ? 'open-package' : 'advance'}" ${isHuman || info.blocked ? 'disabled' : ''}>${done ? '打开终面评估包' : '推进一步'}</button>
         <button class="btn" data-action="auto" ${done ? 'disabled' : ''}>${state.auto ? '停止自动' : '自动演示'}</button>

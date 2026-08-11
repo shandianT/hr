@@ -1,8 +1,47 @@
-# G1a 合成控制面运行实现
+# 招聘 Agent 合成控制面运行实现
 
 状态：`IMPLEMENTED / SYNTHETIC_ONLY` 候选；尚未形成目标环境验证或发布证据。
 
-本目录把 G1a 的第一条工程纵切变成可执行行为：
+本目录目前包含两条彼此隔离、但可由后续案件控制塔串联的可执行纵切。
+
+## 核心功能 1：简历收件到自动开案
+
+独立 Module `recruiting_intake` 负责 Case 出现之前的流程：
+
+> 批准来源 → 附件门 → 结构化简历版本 → 去重与身份信号 → 唯一岗位/周期路由 → 自动开案或附加来源
+
+它与 G1a 后半程控制面使用相同的公共形状：
+
+```python
+intake.submit(command_envelope) -> command_result
+intake.read(projection_request) -> intake_projection
+```
+
+当前实现四类命令：
+
+- `RegisterResumeSubmission`
+- `RecordStructuredResumeVersion`
+- `ResolveApplicationRouting`
+- `OpenOrAttachApplicationCase`
+
+已锁定的合成行为包括：
+
+- 批准来源与来源修订门；来源事件、附件、内容 + 申请意图和命令幂等各自防重。
+- 正常路径零 HR 启动，只有当前 `ROUTED` 修订可以创建 `ApplicationCase.RECEIVED`。
+- 邮箱与 ATS 的同一申请重复到达只附加来源血缘，不产生第二案件业务效果。
+- 邮箱、手机号、姓名和内容哈希只作身份信号；共享信号停在 `ROUTING_REVIEW_REQUIRED`，仅当前 `HIRING_OWNER` 可从已展示候选项提交判断。
+- 同一候选人申请不同岗位形成两个隔离 ApplicationKey，不因内容相同而合并。
+- 加密、损坏、不支持、恶意或扫描未知附件，以及低质量解析，都不会编造结构化字段或开案；异常预算有限。
+- 简历内提示注入只保存为不可信正文发现，工具调用和外部动作始终为 0。
+- 不可信解析结果先经过 closed-schema 校验；普通字段只允许当前白名单并保留 locator 与置信信号，保护字段进入隔离区，未知字段进入脱敏 quarantine。
+- 开案或附加来源命令必须直接指向当前 ApplicationKey 对应的 Case 聚合，并钉住 Routing Revision、Case version 与 lifecycle epoch；同键异载和越权人工候选项明确拒绝。
+- 当前读写授权是精确的合成 fixture grant，用来证明门的行为形状，不冒充生产身份网关。
+
+该切片仍不接真实邮箱、ATS、文件扫描或模型，也没有实现多附件拆人、已开案改键纠正、删除传播、生产身份网关或并发多节点验证。因此它只支持当前行为子集的 `IMPLEMENTED / SYNTHETIC_ONLY`，不能把整个 FR-201..218 或 AT-201..205 升为已完成。
+
+## G1a：面试证据到轮次归档
+
+本目录还把 G1a 的第一条工程纵切变成可执行行为：
 
 > 已结束会话 → 受控导入 → 证据/逐字稿 → 评价草稿 → 人工确认 → 独立人工轮次决定 → 不可变归档
 
@@ -75,6 +114,7 @@ Runner 只能提交自动化 `SERVICE` 命令。任何带 `HUMAN` actor 的确�
 
 ```bash
 python3 -m unittest discover -s runtime/tests -v
+python3 runtime/run_synthetic_intake.py
 python3 runtime/run_synthetic_g1a.py
 ```
 

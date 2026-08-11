@@ -40,5 +40,11 @@ jobs:
       - name: Run deterministic G1a synthetic scenario
         run: python3 runtime/run_synthetic_g1a.py
 
+      - name: Run deterministic resume intake scenario
+        run: python3 runtime/run_synthetic_intake.py
+
       - name: Check product-shape prototype
         run: node prototype/check_demo.mjs
+
+      - name: Check resume-intake product demo
+        run: node prototype/check_intake_demo.mjs
