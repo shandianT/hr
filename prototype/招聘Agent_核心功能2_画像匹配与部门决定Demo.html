@@ -386,7 +386,8 @@
       if(!receipt)return decisionSurface();
       const copy=decisionCopy[receipt.decision]||{label:'决定已记录',effect:''};
       const hold=receipt.decision==='HOLD'&&screeningState.request.status==='ON_HOLD';
-      return `<section class="surface" tabindex="-1" data-surface><div class="surface-body"><div class="receipt-hero"><div class="receipt-mark">✓</div><h2>${h(copy.label)}已记录</h2><p>${hold?'Agent 已停止催办，到期只恢复一张未选择的新任务。':'决定已绑定当前负责人和当前材料。候选人沟通没有在本动作中发送。'}</p></div><div class="receipt-note"><b>${h(receipt.humanActor)}</b><br>判断依据：${h(receipt.reason)}${receipt.revisitAt?`<br>再次查看：${h(receipt.revisitAt)}`:''}</div>${hold?`<div class="primary-row"><span class="small">Demo 操作：模拟到达负责人设定的时间。</span><button class="btn primary" data-action="reach-revisit">到达复核时间</button></div>`:''}</div></section>`;
+      const invite=receipt.decision==='INVITE';
+      return `<section class="surface" tabindex="-1" data-surface><div class="surface-body"><div class="receipt-hero"><div class="receipt-mark">✓</div><h2>${h(copy.label)}已记录</h2><p>${hold?'Agent 已停止催办，到期只恢复一张未选择的新任务。':'决定已绑定当前负责人和当前材料。候选人沟通没有在本动作中发送。'}</p></div><div class="receipt-note"><b>${h(receipt.humanActor)}</b><br>判断依据：${h(receipt.reason)}${receipt.revisitAt?`<br>再次查看：${h(receipt.revisitAt)}`:''}</div>${hold?`<div class="primary-row"><span class="small">Demo 操作：模拟到达负责人设定的时间。</span><button class="btn primary" data-action="reach-revisit">到达复核时间</button></div>`:''}${invite?`<div class="primary-row"><span class="small">下一块产品：Agent 自动准备时段，候选人只处理本人必须完成的选择。</span><a class="btn primary" href="./招聘Agent_核心功能3_候选人约面Demo.html">查看候选人约面</a></div>`:''}</div></section>`;
     }
     function activityRows(){
       return screeningState.activity.map(item=>`<div class="activity-item"><span class="activity-dot ${toneClass(item.tone)}"></span><span>${h(item.text)}</span><span class="activity-time">${h(item.time)}</span></div>`).join('');

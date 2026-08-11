@@ -7,9 +7,9 @@
 ## 当前真实状态
 
 - 产品与控制规格：G1a、G1b 已有规格验收；G2 的 64 FR/28 AT 已通过结构一致性验收；G3 的 60 FR/30 AT 已形成多源结果对账、冻结候选与确认性评测、D0–D4 发布资格、双人批准、独立授权、两阶段未来发布与回滚的产品规格；G2/G3 工程/验证/发布仍为 0。
-- 产品 Demo：[新产品形态 Demo](./prototype/招聘Agent_产品形态Demo_v1.html) 已可点击跑完合成主线，支持 A/B/C 同状态切换、两个必要人工闸门、三个异常恢复分支和可打开的三轮终面评估包；尚无真人任务或真实集成证据。
-- G1a 运行实现：面后最短闭环已形成本地合成控制内核，40 个行为测试与固定场景可重复运行，精确状态为 `IMPLEMENTED / SYNTHETIC_ONLY`。
-- 当前 CI：[`spec-lint` run 31452559339](https://github.com/shandianT/hr/actions/runs/31452559339) 已在 commit `ab8cf20` 通过，覆盖 4 套规格检查、40 个 runtime 行为测试、合成正常链和 Demo 静态交互检查。
+- 产品 Demo：[新产品形态 Demo](./prototype/招聘Agent_产品形态Demo_v1.html) 已可点击跑完合成主线；另有三个低理解成本的独立切片，分别展示[简历收件](./prototype/招聘Agent_核心功能1_简历收件Demo.html)、[简历筛选与部门决定](./prototype/招聘Agent_核心功能2_画像匹配与部门决定Demo.html)和[候选人约面](./prototype/招聘Agent_核心功能3_候选人约面Demo.html)。尚无真人任务或真实集成证据。
+- 运行实现：收件、筛选/部门决定、候选人约面和 G1a 面后归档已有边界明确的本地合成纵切，当前 117 个行为测试与固定 runner 可重复运行，精确状态为 `IMPLEMENTED / SYNTHETIC_ONLY` 子集；G2 矩阵不因此升级。
+- 当前已发布 CI：[`spec-lint` run 31460327366](https://github.com/shandianT/hr/actions/runs/31460327366) 已覆盖到核心功能 2；核心功能 3 当前只有本地 117 / 117 通过证据，待本轮推送后的同提交 GitHub runner 补证。
 - 真实集成、真实数据、模型质量、真人使用与生产发布：尚无完成证据。
 - 发布结论：**No-go**。当前仅允许合成/匿名化数据、沙箱验证和治理准备，不得连接真实邮箱、日历、会议或对候选人执行外部写操作。
 
@@ -19,7 +19,7 @@
 |---|---|---|
 | G1a | 单轮面试后：证据、纪要、评估、确认、人工轮次决策、归档 | PRD、工程开工包、契约、追踪矩阵、合成控制内核与 40 个行为测试 |
 | G1b | 多轮串联：追问清单、轮次依赖、终面评估包、失效与重编译 | PRD、追踪矩阵、规格验收记录 |
-| G2 | 简历接入至可信面试交接：解析、路由、匹配、部门决定、约面、采集闸门、G1 交接 | PRD、领域规格、追踪矩阵；实现/验证/发布为 0 |
+| G2 | 简历接入至可信面试交接：解析、路由、匹配、部门决定、约面、采集闸门、G1 交接 | PRD、领域规格、追踪矩阵；收件、筛选/部门决定、候选人约面各有精确合成子集，但矩阵实现/验证/发布仍为 0 |
 | G3 | 结果回流与画像治理：多源对账、标注成熟、固定 Cohort、预研究冻结候选、确认性评测、发布资格、双人批准、授权与两阶段未来发布、冻结/回滚 | PRD、ADR-0009、领域规格、追踪矩阵与静态验收；IMPLEMENTED/VERIFIED/RELEASED=0，真实数据与画像发布 No-go |
 
 ## 关键入口
@@ -37,7 +37,10 @@
 - [G3 产品规格验收记录](./招聘Agent_G3_产品规格验收记录.md)
 - [Hermes 式 Agent 与 UI 设计原则](./docs/招聘Agent_Hermes式Agent与UI设计原则.md)
 - [可点击产品形态 Demo](./prototype/招聘Agent_产品形态Demo_v1.html)
-- [G1a 合成控制面运行说明](./runtime/README.md)
+- [核心功能 2：简历筛选与部门决定 Demo](./prototype/招聘Agent_核心功能2_画像匹配与部门决定Demo.html)
+- [核心功能 3：候选人约面 Demo](./prototype/招聘Agent_核心功能3_候选人约面Demo.html)
+- [合成控制面运行说明](./runtime/README.md)
+- [核心功能 3 验收记录](./招聘Agent_核心功能3_候选人约面合成Demo验收记录.md)
 - [G1a 合成控制面与产品 Demo 验收记录](./招聘Agent_G1a合成控制面与产品Demo验收记录.md)
 - [新原型设计任务书](./交付/Claude原型设计任务书.md)
 - [控制塔逻辑原型](./招聘Agent控制塔_逻辑原型.html)
@@ -63,7 +66,13 @@ python3 contracts/lint_g2_spec.py
 python3 contracts/lint_g3_spec.py
 python3 -m unittest discover -s runtime/tests -v
 python3 runtime/run_synthetic_g1a.py
+python3 runtime/run_synthetic_intake.py
+python3 runtime/run_synthetic_screening.py
+python3 runtime/run_synthetic_scheduling.py
 node prototype/check_demo.mjs
+node prototype/check_intake_demo.mjs
+node prototype/check_screening_demo.mjs
+node prototype/check_scheduling_demo.mjs
 ```
 
 规格检查只证明文档/契约一致；runtime 测试只证明当前合成子集的行为。它们都不能替代真实集成验收、模型评测、安全评估、合规审查、真人任务或真实业务成效。

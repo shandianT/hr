@@ -2,7 +2,7 @@
 
 状态：`IMPLEMENTED / SYNTHETIC_ONLY` 候选；尚未形成目标环境验证或发布证据。
 
-本目录目前包含三条边界明确的可执行纵切：核心功能 1 负责 Case 出现前的收件与开案，核心功能 2 复用同一 Case 执行画像匹配和部门决定，G1a 负责面后证据到轮次归档。
+本目录目前包含四条边界明确的可执行纵切：核心功能 1 负责 Case 出现前的收件与开案，核心功能 2 复用同一 Case 执行画像匹配和部门决定，核心功能 3 从 fixture-only 的当前可约面会话完成候选人选时与合成 Booking，G1a 负责面后证据到轮次归档。
 
 ## 核心功能 1：简历收件到自动开案
 
@@ -79,6 +79,31 @@ screening.read(projection_request) -> screening_projection
 - 错误/跨租户收件人在 action 建立前被拒绝；所有通知/催办回执都是合成数据，`real_external_effect_count=0`。
 
 34 条专项行为测试已本地通过；当前全 runtime 快照为 105 / 105 通过。该切片仍不证明真实匹配模型、IM/邮件、IAM、独立持久化的 Owner/错误收件人异常接管、分布式 worker/并发、拒信、日历约面、真人或法务已可用。它只支持精确行为子集的 `IMPLEMENTED / SYNTHETIC_ONLY`；G2 需求追踪矩阵继续保持 `SPEC`。
+
+## 核心功能 3：候选人选时到合成 Booking
+
+`recruiting_scheduling` 从一个 fixture-only 的当前 `READY_TO_SCHEDULE` Round 和 `PLANNED / NOT_STARTED` 必需 Session 开始：
+
+> 当前协调请求 → 当前时段提案 → 候选人选时 → 忙闲与控制态重验 → 日历、会议、邀请三类合成资源 → 当前回执齐全 → 唯一 Booking
+
+业务状态读写接口保持不变；合成 Case/Session 的 fixture helper 只用于测试装配，不属于业务 API：
+
+```python
+scheduling.submit(command_envelope) -> command_result
+scheduling.read(projection_request) -> scheduling_projection
+```
+
+已锁定的精确合成行为包括：
+
+- 候选人选中一个当前时段只形成选择意图，不形成 Booking；三个当前预约修订的 `CALENDAR_EVENT / MEETING_RESOURCE / INVITATION_WRITE` 回执齐全后才提交唯一 Booking。
+- 过期 Proposal、选后忙闲变化、错误/跨租户邀请收件人、旧 request/proposal/selection/appointment/action revision 和布尔值伪装版本都会在写入前被拒绝。
+- Provider 已成功但响应丢失时先对账，不盲目重写；重复和迟到回调只形成一份当前事实，旧修订不能复活 Booking。
+- Case 暂停会阻断生产动作和 Booking Commit，但允许精确作用域的安全补偿；两个 Case 争用同一合成时段时最多一个成功占位。
+- Invitation write、邀请实际送达/已读、Recording Notice 送达和 ConsentReceipt 是四类不同事实；当前实现只记录合成 Notice delivery，ConsentReceipt 计数始终为 0。
+- workflow 与 worker 只读取当前 Case、Session 和用途所需的最小视图；资源效果计数按 Case 隔离，参与人引用使用封闭字段，不把邮箱等额外字段写入投影。
+- Adapter 必须持有合成 capability；任意 Connector 不能被注入后仍冒充 `synthetic_only=true`。runner 明确输出 `real_external_effect_count=0`。
+
+12 条专项行为测试已本地通过；当前全 runtime 快照为 117 / 117 通过。该切片不证明核心功能 2 的 `INVITE` 已物化 Interview Plan/Round/Session，也不证明真实日历、会议、邀请、候选人认证、生产 IAM/Outbox/worker、真实送达或录制同意。它只支持精确行为子集的 `IMPLEMENTED / SYNTHETIC_ONLY`；G2 需求追踪矩阵继续保持 `SPEC`。
 
 ## G1a：面试证据到轮次归档
 
@@ -157,6 +182,7 @@ Runner 只能提交自动化 `SERVICE` 命令。任何带 `HUMAN` actor 的确�
 python3 -m unittest discover -s runtime/tests -v
 python3 runtime/run_synthetic_intake.py
 python3 runtime/run_synthetic_screening.py
+python3 runtime/run_synthetic_scheduling.py
 python3 runtime/run_synthetic_g1a.py
 ```
 

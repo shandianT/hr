@@ -43,6 +43,7 @@ for (const requiredToken of [
   "role=\"dialog\"",
   " inert aria-hidden=\"true\"",
   "data-panel=\"runtime-details\"",
+  "招聘Agent_核心功能3_候选人约面Demo.html",
 ]) {
   if (!source.includes(requiredToken)) throw new Error(`screening demo token is missing: ${requiredToken}`);
 }
