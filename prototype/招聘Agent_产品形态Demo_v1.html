@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>招聘 Agent · 产品形态 Demo v1</title>
+  <!-- Three throwaway UI variants of the recruiting Agent control tower, switchable via ?variant=A|B|C. -->
+  <style>
+    :root {
+      --ink: #161918;
+      --muted: #686d69;
+      --line: #d9dcd7;
+      --paper: #f6f5f1;
+      --surface: #ffffff;
+      --accent: #2458e6;
+      --accent-soft: #e9efff;
+      --good: #177a52;
+      --good-soft: #e5f4ed;
+      --warn: #aa5b13;
+      --warn-soft: #fff0dc;
+      --danger: #b33b36;
+      --danger-soft: #fbe9e7;
+      --shadow: 0 16px 46px rgba(31, 37, 34, .10);
+      --r: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); }
+    body {
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      letter-spacing: -.01em;
+    }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, select:focus-visible { outline: 3px solid rgba(36, 88, 230, .24); outline-offset: 2px; }
+    .mono { font-family: "SFMono-Regular", Consolas, monospace; letter-spacing: 0; }
+    .eyebrow { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    .small { color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .strong { font-weight: 720; }
+    .muted { color: var(--muted); }
+    .dot { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: currentColor; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px; min-height: 26px; padding: 4px 9px;
+      border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted);
+      font-size: 11px; font-weight: 700; letter-spacing: .01em; white-space: nowrap;
+    }
+    .pill.good { background: var(--good-soft); border-color: #c9e9d9; color: var(--good); }
+    .pill.warn { background: var(--warn-soft); border-color: #f2d5ae; color: var(--warn); }
+    .pill.danger { background: var(--danger-soft); border-color: #f0c8c4; color: var(--danger); }
+    .pill.blue { background: var(--accent-soft); border-color: #ccdaff; color: var(--accent); }
+    .btn {
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px;
+      min-height: 38px; padding: 8px 13px; font-weight: 680; transition: transform .14s ease, background .14s ease;
+    }
+    .btn:hover { transform: translateY(-1px); background: #f2f3ef; }
+    .btn.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .btn.primary:hover { background: #2b302e; }
+    .btn.accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn.accent:hover { background: #1747cc; }
+    .btn.danger { color: var(--danger); border-color: #e9bab6; background: var(--danger-soft); }
+    .btn:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+    .btn.tiny { min-height: 30px; padding: 5px 9px; border-radius: 8px; font-size: 12px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+    .prototype-note {
+      display: flex; align-items: center; gap: 8px; color: #665d45; background: #fff9e9;
+      border-bottom: 1px solid #e9dfc2; min-height: 34px; padding: 7px 18px; font-size: 12px;
+    }
+    .prototype-note b { color: #2c2b26; }
+    .switcher {
+      position: fixed; z-index: 99; left: 50%; bottom: 18px; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 5px; padding: 6px; border-radius: 999px;
+      background: #111413; color: #fff; box-shadow: 0 12px 40px rgba(0,0,0,.28);
+    }
+    .switcher button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: #fff; font-size: 18px; }
+    .switcher button:hover { background: #2b302e; }
+    .switcher-label { min-width: 180px; text-align: center; font-size: 12px; font-weight: 700; }
+    .toast {
+      position: fixed; z-index: 110; right: 20px; top: 20px; padding: 12px 15px; color: #fff;
+      background: #171a19; border-radius: 10px; box-shadow: var(--shadow); opacity: 0; transform: translateY(-8px);
+      pointer-events: none; transition: .2s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .progress-line { height: 4px; background: #e6e8e3; overflow: hidden; }
+    .progress-line > i { display: block; height: 100%; background: var(--accent); transition: width .3s ease; }
+    .round-ribbon { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 14px; border-bottom: 1px solid var(--line); background: #fafbf8; }
+    .round-ribbon .round-label { margin-right: 2px; color: var(--muted); font-size: 11px; font-weight: 750; }
+    .round-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid var(--line); background: #fff; border-radius: 8px; color: var(--muted); font-size: 11px; font-weight: 680; }
+    .round-chip.done { color: var(--good); border-color: #c8e3d5; background: var(--good-soft); }
+    .round-chip.current { color: var(--accent); border-color: #c9d7ff; background: var(--accent-soft); }
+    .package-backdrop { position: fixed; z-index: 120; inset: 0; padding: 24px; background: rgba(15,18,17,.58); display: grid; place-items: center; }
+    .package-modal { width: min(1040px, 100%); max-height: calc(100vh - 48px); overflow: auto; background: #f8f8f5; border: 1px solid #bfc4be; box-shadow: 0 24px 80px rgba(0,0,0,.32); }
+    .package-top { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 18px 20px; color: #fff; background: #171a19; }
+    .package-top h2 { margin: 5px 0 0; font-size: 24px; letter-spacing: -.04em; }
+    .package-body { padding: 20px; }
+    .package-summary { display: grid; grid-template-columns: 1.2fr .8fr; gap: 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .package-lead { font-size: 20px; line-height: 1.35; letter-spacing: -.03em; font-weight: 720; }
+    .package-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .package-fact { padding: 10px; border-left: 2px solid var(--line); }
+    .package-section { padding: 19px 0; border-bottom: 1px solid var(--line); }
+    .package-section:last-child { border: 0; }
+    .package-section h3 { margin: 0 0 11px; font-size: 15px; }
+    .round-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .round-table th, .round-table td { text-align: left; vertical-align: top; padding: 10px 9px; border-bottom: 1px solid var(--line); }
+    .round-table th { color: var(--muted); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+    .evidence-ref { display: inline-flex; padding: 3px 6px; border-radius: 5px; color: #315a4a; background: #e7f1ec; font-family: monospace; font-size: 10px; }
+    .package-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    .package-list { margin: 0; padding-left: 18px; color: #454a47; line-height: 1.65; font-size: 12px; }
+
+    /* Variant A: control room */
+    .a-shell { min-height: calc(100vh - 34px); display: grid; grid-template-columns: 218px 1fr; }
+    .a-nav { background: #151a18; color: #e9ede9; padding: 24px 16px; display: flex; flex-direction: column; }
+    .brand { display: flex; align-items: center; gap: 11px; padding: 0 8px 24px; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 9px; background: #d9ff59; color: #111; display: grid; place-items: center; font-weight: 900; }
+    .brand-title { font-size: 14px; font-weight: 770; }
+    .brand-sub { margin-top: 2px; color: #929b95; font-size: 10px; }
+    .nav-group { margin-top: 18px; color: #77817b; font-size: 10px; padding: 0 10px 7px; text-transform: uppercase; letter-spacing: .12em; }
+    .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 11px; border-radius: 9px; color: #aeb7b1; margin: 2px 0; }
+    .nav-item.active { background: #2a322e; color: #fff; }
+    .nav-item em { font-style: normal; font-size: 10px; color: #111; background: #d9ff59; padding: 2px 6px; border-radius: 9px; }
+    .nav-foot { margin-top: auto; border-top: 1px solid #303733; padding: 16px 8px 2px; }
+    .a-main { min-width: 0; }
+    .a-top { min-height: 68px; padding: 14px 24px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.72); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .a-body { padding: 22px 24px 88px; max-width: 1500px; margin: 0 auto; }
+    .candidate-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+    .candidate-id { display: flex; align-items: center; gap: 13px; }
+    .avatar { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: #e1e4de; color: #3e4842; font-size: 17px; font-weight: 790; }
+    .candidate-name { font-size: 22px; font-weight: 760; letter-spacing: -.04em; }
+    .head-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .scenario-select { border: 1px solid var(--line); border-radius: 10px; background: #fff; min-height: 38px; padding: 7px 30px 7px 11px; color: var(--ink); }
+    .metric-strip { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: var(--r); background: #fff; margin-bottom: 18px; overflow: hidden; }
+    .metric { padding: 14px 16px; border-right: 1px solid var(--line); }
+    .metric:last-child { border: 0; }
+    .metric-value { margin-top: 5px; font-size: 18px; font-weight: 760; }
+    .a-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(290px, .72fr); gap: 18px; align-items: start; }
+    .journey-card { overflow: hidden; }
+    .card-head { min-height: 54px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); }
+    .card-title { font-size: 14px; font-weight: 760; }
+    .timeline { padding: 6px 16px 10px; }
+    .stage-row { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 11px; padding: 13px 0; border-bottom: 1px solid #eceee9; }
+    .stage-row:last-child { border: 0; }
+    .stage-node { position: relative; width: 24px; height: 24px; border: 1px solid #ccd1cb; border-radius: 50%; display: grid; place-items: center; color: #929892; font-size: 11px; background: #fff; z-index: 1; }
+    .stage-row.done .stage-node { background: var(--good); border-color: var(--good); color: #fff; }
+    .stage-row.current .stage-node { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 0 5px var(--accent-soft); }
+    .stage-main { min-width: 0; }
+    .stage-label { font-weight: 710; }
+    .stage-detail { color: var(--muted); font-size: 12px; margin-top: 4px; line-height: 1.45; }
+    .stage-time { color: #8a908c; font-size: 11px; padding-top: 3px; white-space: nowrap; }
+    .stage-row.current .stage-label { color: var(--accent); }
+    .agent-panel { overflow: hidden; }
+    .agent-now { padding: 17px; border-bottom: 1px solid var(--line); }
+    .agent-state { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 9px 0 12px; }
+    .agent-state h3 { margin: 0; font-size: 18px; letter-spacing: -.03em; }
+    .thinking { padding: 12px; background: #f4f5f1; border-left: 3px solid var(--accent); line-height: 1.55; font-size: 12px; }
+    .rail-list { padding: 8px 16px 15px; }
+    .rail-item { display: grid; grid-template-columns: 74px 1fr; gap: 9px; padding: 10px 0; border-bottom: 1px solid #eceee9; }
+    .rail-item:last-child { border: 0; }
+    .rail-k { color: var(--muted); font-size: 11px; }
+    .rail-v { font-size: 12px; font-weight: 650; line-height: 1.45; }
+    .decision-box { margin: 14px 16px 16px; padding: 14px; border: 1px solid #d7dfcf; background: #f5f9ef; border-radius: 12px; }
+    .decision-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .output-card { grid-column: 1 / -1; padding: 16px; }
+    .output-grid { display: grid; grid-template-columns: 1.3fr repeat(3, .7fr); gap: 12px; margin-top: 12px; }
+    .output-block { border-left: 2px solid var(--line); padding: 4px 10px; }
+    .output-block.ready { border-color: var(--good); }
+
+    /* Variant B: candidate journey */
+    .b-shell { min-height: calc(100vh - 34px); background: #eeeae1; padding-bottom: 84px; }
+    .b-top { max-width: 1460px; margin: 0 auto; padding: 24px 32px 10px; display: flex; align-items: center; justify-content: space-between; }
+    .b-wordmark { font-weight: 850; letter-spacing: -.04em; font-size: 18px; }
+    .b-canvas { max-width: 1400px; margin: 12px auto; padding: 0 32px; }
+    .b-hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(330px, .75fr); gap: 28px; align-items: end; padding: 44px 0 34px; border-bottom: 1px solid #bfc0ba; }
+    .b-hero h1 { margin: 8px 0 14px; font-size: clamp(36px, 5vw, 72px); line-height: .98; letter-spacing: -.07em; max-width: 850px; font-weight: 760; }
+    .b-hero h1 span { color: var(--accent); }
+    .b-summary { max-width: 480px; justify-self: end; }
+    .b-summary p { font-size: 15px; line-height: 1.65; color: #555a56; }
+    .b-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .b-map { display: grid; grid-template-columns: repeat(8, minmax(120px, 1fr)); overflow-x: auto; padding: 28px 0 22px; border-bottom: 1px solid #bfc0ba; }
+    .b-step { min-width: 120px; position: relative; border-left: 1px solid #bfc0ba; padding: 0 14px 12px; min-height: 122px; }
+    .b-step:first-child { border-left: 0; padding-left: 0; }
+    .b-no { font-size: 11px; color: #7d817d; font-family: monospace; }
+    .b-step h3 { font-size: 14px; margin: 15px 0 7px; }
+    .b-step p { color: #767a76; font-size: 11px; line-height: 1.45; margin: 0; }
+    .b-step.done h3 { color: var(--good); }
+    .b-step.current { background: #fff; box-shadow: inset 0 -4px 0 var(--accent); padding-top: 12px; margin-top: -12px; }
+    .b-step.current h3 { color: var(--accent); }
+    .b-detail { display: grid; grid-template-columns: 1.2fr .8fr .8fr; gap: 0; border-bottom: 1px solid #bfc0ba; }
+    .b-column { padding: 28px 24px 30px 0; margin-right: 24px; border-right: 1px solid #bfc0ba; }
+    .b-column:last-child { border: 0; margin-right: 0; }
+    .b-big { font-size: 26px; line-height: 1.18; letter-spacing: -.045em; margin: 10px 0 16px; font-weight: 720; }
+    .b-line { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.08); font-size: 12px; }
+    .b-line span:first-child { color: #6d716e; }
+    .b-action { margin-top: 18px; padding: 15px 0 0; border-top: 3px solid var(--ink); }
+    .b-final { margin-top: 28px; padding: 24px; background: #171a19; color: #fff; display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; }
+    .b-final h2 { margin: 6px 0; font-size: 28px; }
+    .b-final-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-content: center; }
+    .b-final-item { padding: 9px 0; border-bottom: 1px solid #3c423f; font-size: 12px; color: #c6cdc8; }
+
+    /* Variant C: operations workbench */
+    .c-shell { min-height: calc(100vh - 34px); background: #f8f8f6; padding-bottom: 74px; }
+    .c-top { min-height: 62px; display: grid; grid-template-columns: 250px 1fr auto; align-items: center; border-bottom: 1px solid var(--line); padding: 0 18px; background: #fff; }
+    .c-search { max-width: 460px; height: 34px; border: 1px solid var(--line); border-radius: 8px; display: flex; align-items: center; padding: 0 11px; color: #8a8f8b; font-size: 12px; }
+    .c-grid { display: grid; grid-template-columns: 260px minmax(500px, 1fr) 330px; min-height: calc(100vh - 96px); }
+    .c-queue { border-right: 1px solid var(--line); background: #f2f3ef; padding: 15px 10px; }
+    .queue-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px 12px; }
+    .queue-card { padding: 12px; border: 1px solid transparent; border-radius: 10px; margin-bottom: 5px; }
+    .queue-card.active { background: #fff; border-color: var(--line); box-shadow: 0 6px 18px rgba(29,35,31,.06); }
+    .queue-card.muted-card { opacity: .58; }
+    .queue-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .queue-name { font-weight: 720; }
+    .queue-meta { color: var(--muted); font-size: 11px; margin-top: 5px; }
+    .c-work { min-width: 0; padding: 21px; }
+    .work-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding-bottom: 18px; }
+    .work-title { font-size: 22px; font-weight: 760; letter-spacing: -.04em; }
+    .work-actions { display: flex; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
+    .c-stagebar { display: grid; grid-template-columns: repeat(8, 1fr); border: 1px solid var(--line); background: #fff; }
+    .c-stage { padding: 11px 8px; min-height: 63px; border-right: 1px solid var(--line); }
+    .c-stage:last-child { border: 0; }
+    .c-stage.current { background: var(--accent-soft); box-shadow: inset 0 -3px 0 var(--accent); }
+    .c-stage.done { background: #f2f8f4; }
+    .c-stage .n { color: #8b918d; font-size: 10px; }
+    .c-stage .l { margin-top: 7px; font-size: 11px; font-weight: 690; }
+    .c-workgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+    .work-card { padding: 16px; min-height: 210px; }
+    .work-card h3 { margin: 5px 0 13px; font-size: 17px; }
+    .fact-row { display: grid; grid-template-columns: 98px 1fr; gap: 10px; padding: 9px 0; border-bottom: 1px solid #eceee9; font-size: 12px; }
+    .fact-row span:first-child { color: var(--muted); }
+    .signal { padding: 10px 0; display: grid; grid-template-columns: 1fr auto; gap: 10px; border-bottom: 1px solid #eceee9; }
+    .signal b { font-size: 12px; }
+    .signal p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+    .c-agent { border-left: 1px solid var(--line); background: #fff; padding: 17px; }
+    .agent-orb { width: 42px; height: 42px; border-radius: 50%; background: #171a19; color: #d9ff59; display: grid; place-items: center; font-weight: 850; margin-bottom: 18px; }
+    .c-agent h2 { font-size: 19px; margin: 4px 0 7px; }
+    .activity { margin-top: 18px; }
+    .activity-item { position: relative; padding: 0 0 17px 18px; font-size: 12px; line-height: 1.45; color: #434844; }
+    .activity-item::before { content: ""; position: absolute; left: 0; top: 4px; width: 7px; height: 7px; border-radius: 50%; background: #b9bfba; }
+    .activity-item.current::before { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+    .activity-time { color: #969b97; font-size: 10px; margin-top: 3px; }
+    .c-decision { margin-top: 15px; padding: 13px; background: #f6f8ef; border: 1px solid #dbe3c9; }
+
+    @media (max-width: 1080px) {
+      .a-shell { grid-template-columns: 72px 1fr; }
+      .a-nav .brand-title, .a-nav .brand-sub, .a-nav .nav-group, .a-nav .nav-item span, .nav-foot { display: none; }
+      .a-nav .nav-item { justify-content: center; }
+      .a-grid { grid-template-columns: 1fr; }
+      .output-card { grid-column: 1; }
+      .c-grid { grid-template-columns: 210px 1fr; }
+      .c-agent { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+      .b-detail { grid-template-columns: 1fr 1fr; }
+      .b-column:first-child { grid-column: 1 / -1; border-right: 0; border-bottom: 1px solid #bfc0ba; }
+    }
+    @media (max-width: 760px) {
+      .prototype-note { padding: 8px 12px; }
+      .a-shell { display: block; }
+      .a-nav { display: none; }
+      .a-top, .candidate-head { align-items: flex-start; flex-direction: column; }
+      .a-body { padding: 16px 12px 80px; }
+      .metric-strip { grid-template-columns: 1fr 1fr; }
+      .metric:nth-child(2) { border-right: 0; }
+      .metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .output-grid { grid-template-columns: 1fr 1fr; }
+      .b-top, .b-canvas { padding-left: 16px; padding-right: 16px; }
+      .b-hero { grid-template-columns: 1fr; padding-top: 24px; }
+      .b-summary { justify-self: start; }
+      .b-detail, .b-final { grid-template-columns: 1fr; }
+      .b-column { border-right: 0; border-bottom: 1px solid #bfc0ba; margin-right: 0; }
+      .c-top { grid-template-columns: 1fr auto; }
+      .c-search { display: none; }
+      .c-grid { display: block; }
+      .c-queue { display: none; }
+      .c-work { padding: 14px 10px; }
+      .c-stagebar { overflow-x: auto; grid-template-columns: repeat(8, 100px); }
+      .c-workgrid { grid-template-columns: 1fr; }
+      .switcher-label { min-width: 132px; }
+      .b-hero h1 { font-size: 34px; }
+      .package-backdrop { padding: 0; }
+      .package-modal { max-height: 100vh; }
+      .package-summary, .package-columns { grid-template-columns: 1fr; }
+      .round-table { min-width: 700px; }
+      .package-section { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const variants = [
+      { key: 'A', name: '控制室' },
+      { key: 'B', name: '候选人旅程' },
+      { key: 'C', name: '运营工作台' }
+    ];
+    const stages = [
+      { key: 'intake', label: '简历收件', detail: '完成解析、去重与应聘岗位归档', action: '读取附件并生成结构化候选人档案', wait: '无', next: '运行画像匹配', eta: '16 秒' },
+      { key: 'match', label: '画像匹配', detail: '给出 86 分匹配与可追溯证据', action: '对照岗位画像标记经验、能力与风险', wait: '无', next: '推送用人部门', eta: '28 秒' },
+      { key: 'department', label: '部门筛选', detail: '用人负责人做唯一推进决定', action: '推送摘要、证据与风险提示，按 SLA 催反馈', wait: '用人负责人 · 周岩', next: '获得推进 / 暂缓 / 结束决定', eta: '2 小时 SLA', human: true },
+      { key: 'schedule', label: '各轮自动约面', detail: '一面 / 二面 / 终面逐轮读忙闲、发时段、创建含录制告知的会议邀请', action: '协调候选人与当轮面试官的可用时段，并准备录制告知与等价无录制路线', wait: '候选人选时', next: '二次校验时段后建会', eta: '8 分钟' },
+      { key: 'brief', label: '各轮面试准备', detail: '每轮面试前自动生成追问清单，同时带入上轮证据缺口', action: '结合画像、简历与已有轮次生成当轮面试简报', wait: '无', next: '会前 30 分钟推送面试官', eta: '会前 30 分' },
+      { key: 'evidence', label: '各轮会后处理', detail: '每轮结束后形成转写、证据引用、纪要与评估草稿', action: '结算录制 / 无录制路线，生成带引用的当轮评估', wait: '无', next: '提交当轮面试官确认', eta: '4 分钟' },
+      { key: 'confirm', label: '各轮评估确认', detail: '每轮面试官确认证据与评估，然后归档串联；不由 Agent 代签', action: '汇总当轮可验证结论，串联前序轮次，并追踪确认截止时间', wait: '终面面试官 · 陈曦', next: '确认或要求修改', eta: '4 小时 SLA', human: true },
+      { key: 'package', label: '终面评估包', detail: '各轮证据、结论、风险和未解问题完整串联', action: '编译不可变的终面评估包并提交招聘团队', wait: '无', next: '人做最终招聘决定；结果再以受控事实回流画像治理', eta: '已就绪' }
+    ];
+    const scenarioCopy = {
+      normal: { label: '正常主线', blockAt: -1, title: '', body: '' },
+      consent: { label: '录制同意缺失', blockAt: 5, title: '采集闸门未通过', body: '新加入参与人尚未完成同意。Agent 已停止录制派生处理，可切换为无录制笔记路线。' },
+      calendar: { label: '日历时段冲突', blockAt: 3, title: '忙闲已变化', body: '候选人选中时段后，面试官日历发生变化。Agent 未建会，正在生成新时段。' },
+      overdue: { label: '部门反馈超时', blockAt: 2, title: 'SLA 已超时 42 分钟', body: '已完成两次克制催办，仍无决定。Agent 已打包事实、影响与建议选项，准备升级。' }
+    };
+    const recoveryRoutes = {
+      consent: { route: 'NO_RECORDING · 笔记证据路线', checkpoint: 'SESSION-R3 / REV-2', note: '停止后续录制采集，保留等价无录制路线；不影响候选人招聘机会。' },
+      calendar: { route: 'PROPOSAL REV-2 · 旧时段未建会', checkpoint: 'SCHEDULE-R3 / REV-2', note: '已作废过期时段，重新读取忙闲，只会对新修订提案建会。' },
+      overdue: { route: 'EXCEPTION BUNDLE · 升级招聘运营', checkpoint: 'DEPARTMENT-DECISION / GEN-3', note: '同一事实包只升级一次，包含影响、已尝试动作与可选处置。' }
+    };
+    const capability = ['邮箱收件（模拟）', '简历解析（模拟）', '画像匹配（模拟）', '日历与会议（模拟）', '评估编译（可运行内核）'];
+    const state = {
+      step: 0,
+      scenario: 'normal',
+      resolved: false,
+      recovery: null,
+      humanBranch: null,
+      decisionTrail: [],
+      evaluationRevision: 1,
+      packageOpen: false,
+      auto: false,
+      timer: null,
+      inspected: 0,
+      variant: new URL(location.href).searchParams.get('variant') || 'B'
+    };
+
+    function currentVariant() {
+      const key = state.variant;
+      return variants.some(v => v.key === key) ? key : 'A';
+    }
+    function statusInfo() {
+      const stage = stages[state.step];
+      const scenario = scenarioCopy[state.scenario];
+      const blocked = !state.resolved && scenario.blockAt === state.step;
+      if (state.step === stages.length - 1) return { key: 'done', label: '评估包已就绪', class: 'good', blocked: false };
+      if (blocked) return { key: 'blocked', label: '需要处理', class: 'danger', blocked: true };
+      if (state.humanBranch && state.humanBranch.at === state.step) return { key: 'branch', label: state.humanBranch.status, class: 'danger', blocked: false };
+      if (stage.human) return { key: 'human', label: '等待必要人工决定', class: 'warn', blocked: false };
+      return { key: 'running', label: 'Agent 执行中', class: 'blue', blocked: false };
+    }
+    function progress() { return Math.round(((state.step + 1) / stages.length) * 100); }
+    function stageStatus(i) { return i < state.step ? 'done' : i === state.step ? 'current' : 'todo'; }
+    function stepTime(i) {
+      if (i < state.step) return ['09:02', '09:03', '09:08', '09:18', '13:30', '15:34', '16:02', '16:04'][i];
+      if (i === state.step) return '现在';
+      return '待执行';
+    }
+    function activityItems() {
+      const start = Math.max(0, state.step - 3);
+      const rows = [];
+      if (state.recovery && state.recovery.at === state.step) {
+        rows.push({ text: `已记录恢复路线：${state.recovery.route}（${state.recovery.checkpoint}）`, time: '刚刚', current: true });
+      }
+      if (state.humanBranch && state.humanBranch.at === state.step) {
+        rows.push({ text: `${state.humanBranch.status}：${state.humanBranch.reason}`, time: '刚刚', current: true });
+      }
+      for (let i = state.step; i >= start; i--) {
+        rows.push({ text: i === state.step ? stages[i].action : stages[i].detail, time: i === state.step ? '当前检查点' : `${(state.step - i) * 3 + 2} 分钟前`, current: i === state.step && rows.length === 0 });
+      }
+      return rows;
+    }
+    function scenarioOptions() {
+      return Object.entries(scenarioCopy).map(([key, item]) => `<option value="${key}" ${state.scenario === key ? 'selected' : ''}>${item.label}</option>`).join('');
+    }
+    function commonControls(accent = false) {
+      const info = statusInfo();
+      const isHuman = stages[state.step].human && !info.blocked;
+      const done = state.step === stages.length - 1;
+      return `
+        <select class="scenario-select" data-action="scenario" aria-label="选择演示场景">${scenarioOptions()}</select>
+        <button class="btn ${accent ? 'accent' : 'primary'}" data-action="${done ? 'open-package' : 'advance'}" ${isHuman || info.blocked ? 'disabled' : ''}>${done ? '打开终面评估包' : '推进一步'}</button>
+        <button class="btn" data-action="auto" ${done ? 'disabled' : ''}>${state.auto ? '停止自动' : '自动演示'}</button>
+        <button class="btn" data-action="reset">重置</button>`;
+    }
+    function decisionBox(style = '') {
+      const info = statusInfo();
+      const s = scenarioCopy[state.scenario];
+      if (state.recovery && state.recovery.at === state.step) return `<div class="${style || 'decision-box'}"><div class="eyebrow">恢复记录 · APPLIED</div><div class="strong" style="margin-top:7px">${state.recovery.route}</div><div class="small" style="margin-top:6px">${state.recovery.note}</div><div class="small mono" style="margin-top:7px">检查点 ${state.recovery.checkpoint} · 重试 0</div><div class="decision-actions"><button class="btn primary tiny" data-action="continue-recovery">从检查点继续</button><button class="btn tiny" data-action="reset">返回主线</button></div></div>`;
+      if (info.blocked) return `<div class="${style || 'decision-box'}"><div class="eyebrow">异常分支</div><div class="strong" style="margin-top:7px">${s.title}</div><div class="small" style="margin-top:6px">${s.body}</div><div class="decision-actions"><button class="btn primary tiny" data-action="resolve">按安全路线继续</button><button class="btn tiny" data-action="reset">返回主线</button></div></div>`;
+      if (state.humanBranch && state.humanBranch.at === state.step) return `<div class="${style || 'decision-box'}"><div class="eyebrow">人工分支已留痕</div><div class="strong" style="margin-top:7px">${state.humanBranch.status}</div><div class="small" style="margin-top:6px">原因：${state.humanBranch.reason}</div><div class="small mono" style="margin-top:7px">检查点 ${state.humanBranch.checkpoint}</div><div class="decision-actions"><button class="btn primary tiny" data-action="resume-human">${state.step === 2 ? '补充完成，返回决策' : `打开评估修订 v${state.evaluationRevision}`}</button></div></div>`;
+      if (!stages[state.step].human) return '';
+      const firstGate = state.step === 2;
+      return `<div class="${style || 'decision-box'}"><div class="eyebrow">仅人可做</div><div class="strong" style="margin-top:7px">${firstGate ? '提交你的筛选决定' : '确认评估中的事实与引用'}</div><div class="small" style="margin-top:6px">Agent 已准备证据与建议，但不会代替你作出这个决定。</div><div class="decision-actions"><button class="btn accent tiny" data-action="human-confirm">${firstGate ? '推进候选人' : '确认评估'}</button><button class="btn tiny" data-action="human-revise">${firstGate ? '暂缓并说明' : '要求修改'}</button></div></div>`;
+    }
+    function roundRibbon() {
+      const finalState = { 3: '自动约面中', 4: '会前准备中', 5: '会后处理中', 6: '等待确认' }[state.step] || '待开始';
+      const rows = state.step < 3
+        ? [['一面', '待开始', ''], ['二面', '待开始', ''], ['终面', '待开始', '']]
+        : state.step >= 7
+          ? [['一面', '已归档', 'done'], ['二面', '已归档', 'done'], ['终面', '已确认', 'done']]
+          : [['一面', '已归档', 'done'], ['二面', '已归档', 'done'], ['终面', finalState, 'current']];
+      return `<div class="round-ribbon"><span class="round-label">多轮循环 · ${state.step >= 3 && state.step < 7 ? '前两轮快速回放，终面完整演示' : '同一安全流程逐轮执行'}</span>${rows.map(x => `<span class="round-chip ${x[2]}">${x[0]} · ${x[1]}</span>`).join('')}</div>`;
+    }
+    function stageRows() {
+      return stages.map((stage, i) => `<div class="stage-row ${stageStatus(i)}" data-inspect="${i}"><div class="stage-node">${i < state.step ? '✓' : i + 1}</div><div class="stage-main"><div class="stage-label">${stage.label}</div><div class="stage-detail">${stage.detail}</div></div><div class="stage-time">${stepTime(i)}</div></div>`).join('');
+    }
+    function topNote() {
+      return `<div class="prototype-note"><span class="pill warn">原型</span><b>全部为合成数据</b><span>·</span><span>用于确认产品形态和核心交互，不会读取真实邮箱、日历或会议。</span></div>`;
+    }
+    function packageModal() {
+      if (!state.packageOpen) return '';
+      const recordingRoute = state.scenario === 'consent' && state.recovery
+        ? 'NO_RECORDING · 授权笔记交接'
+        : 'RECORDING · 参与人同意收据齐全';
+      const decisions = state.decisionTrail.length
+        ? state.decisionTrail.map(x => `<li>${x.label} · ${x.actor} · ${x.time}</li>`).join('')
+        : '<li>本次预览未记录人工决定</li>';
+      return `<div class="package-backdrop"><article class="package-modal" role="dialog" aria-modal="true" aria-labelledby="package-title">
+        <header class="package-top"><div><div class="eyebrow" style="color:#aeb6b1">合成样例 · FINAL ASSESSMENT PACKAGE / REV 1</div><h2 id="package-title">林可欣 — AI 产品经理</h2></div><button class="btn tiny" data-action="close-package">关闭</button></header>
+        <div class="package-body"><section class="package-summary"><div><div class="eyebrow">终面评审摘要</div><div class="package-lead" style="margin-top:8px">可进入最终招聘决策会；建议人工重点权衡商业化结果的可验证性。</div><p class="small">这是评估准备产物，不是录用或淘汰决定。最终招聘决定仍由有权人员作出。</p></div><div class="package-facts"><div class="package-fact"><div class="eyebrow">画像匹配</div><b>86 / 100 · v3</b></div><div class="package-fact"><div class="eyebrow">证据引用</div><b>12 条可定位</b></div><div class="package-fact"><div class="eyebrow">面试轮次</div><b>3 / 3 已确认</b></div><div class="package-fact"><div class="eyebrow">未解问题</div><b>2 项</b></div></div></section>
+        <section class="package-section"><h3>各轮结论与证据地图</h3><table class="round-table"><thead><tr><th>轮次</th><th>核心结论</th><th>证据</th><th>风险 / 追问</th><th>确认</th></tr></thead><tbody>
+          <tr><td><b>一面</b><br>业务面</td><td>能将模糊需求拆成可验证路径，跨团队推进证据完整。</td><td><span class="evidence-ref">R1-E03</span> <span class="evidence-ref">CV-P12</span></td><td>继续核验产品结果与个人贡献的边界。</td><td>王楠 · 14:08</td></tr>
+          <tr><td><b>二面</b><br>专业面</td><td>AI 产品化方法扎实，能说明评测、灰度和失效降级。</td><td><span class="evidence-ref">R2-E02</span> <span class="evidence-ref">R2-E08</span></td><td>模型质量指标定义仍需结合真实业务核对。</td><td>李博 · 11:42</td></tr>
+          <tr><td><b>终面</b><br>经营面</td><td>战略理解与组织协作达标；商业化指标只有方向性证据。</td><td><span class="evidence-ref">R3-E04</span> <span class="evidence-ref">R3-E09</span></td><td>需决策人权衡：是否在试用期设置 90 天可验证目标。</td><td>陈曦 · 16:02</td></tr>
+        </tbody></table></section>
+        <section class="package-section package-columns"><div><h3>能力评分</h3><ul class="package-list"><li>复杂项目推进：4.4 / 5</li><li>AI 产品化：4.2 / 5</li><li>用户与业务洞察：4.0 / 5</li><li>商业化结果：3.2 / 5（证据不完整）</li></ul></div><div><h3>风险与未解问题</h3><ul class="package-list"><li>两个营收数据无可独立核验的来源，不得当作已证实事实。</li><li>团队规模从 8 人扩到 23 人期间的直接管理责任需背调核对。</li></ul></div></section>
+        <section class="package-section package-columns"><div><h3>人工确认与版本</h3><ul class="package-list">${decisions}<li>当前评估修订：v${state.evaluationRevision}</li></ul></div><div><h3>证据与控制记录</h3><ul class="package-list"><li>${recordingRoute}</li><li>Case AP-24081 · Lifecycle Epoch 1</li><li>Role Profile v3 · Evidence Manifest SHA-256: 8f3a…74c1</li><li>所有外发为模拟，未向真实候选人或面试官发送</li></ul></div></section>
+        <section class="package-section"><h3>下一动作</h3><div class="package-lead">提交最终招聘决策会；人工决定形成后，只作为可纠正的来源事实进入画像治理，Agent 不直接改画像。</div></section></div>
+      </article></div>`;
+    }
+    function renderA() {
+      const info = statusInfo(); const st = stages[state.step];
+      return `${topNote()}<div class="a-shell">
+        <aside class="a-nav"><div class="brand"><div class="brand-mark">H</div><div><div class="brand-title">招聘 Agent</div><div class="brand-sub">AUTONOMOUS OPERATIONS</div></div></div>
+          <div class="nav-group">工作区</div>
+          <div class="nav-item active"><span>控制塔</span><em>1</em></div><div class="nav-item"><span>候选人</span><small>24</small></div><div class="nav-item"><span>人工决策</span><small>3</small></div><div class="nav-item"><span>面试日程</span></div><div class="nav-item"><span>评估中心</span></div>
+          <div class="nav-group">治理</div><div class="nav-item"><span>异常与升级</span><small>1</small></div><div class="nav-item"><span>审计回放</span></div>
+          <div class="nav-foot"><div class="pill good"><span class="dot"></span> Agent 健康</div><div class="small" style="color:#78817c;margin-top:9px">v0.1 · 模拟运行</div></div>
+        </aside>
+        <section class="a-main"><header class="a-top"><div><div class="eyebrow">招聘运营 / 当前案件</div><div class="strong" style="margin-top:5px">一个页面看清 Agent 到了哪、在等谁、将交付什么</div></div><div class="pill ${info.class}"><span class="dot"></span>${info.label}</div></header>
+          <main class="a-body"><div class="candidate-head"><div class="candidate-id"><div class="avatar">林</div><div><div class="candidate-name">林可欣</div><div class="small">AI 产品经理 · 上海 · 申请编号 AP-24081</div></div></div><div class="head-actions">${commonControls(true)}</div></div>
+          <div class="metric-strip"><div class="metric"><div class="eyebrow">完成进度</div><div class="metric-value">${progress()}%</div></div><div class="metric"><div class="eyebrow">画像匹配</div><div class="metric-value">86 <span class="small">/ 100</span></div></div><div class="metric"><div class="eyebrow">非计划 HR 触发</div><div class="metric-value">0 <span class="small">次</span></div></div><div class="metric"><div class="eyebrow">当前 SLA</div><div class="metric-value">${st.human ? st.eta : '正常'}</div></div></div>
+          <div class="a-grid"><section class="card journey-card"><div class="card-head"><div><div class="card-title">候选人中段旅程</div><div class="small">从简历收件到终面评估包</div></div><span class="pill blue">${state.step + 1} / ${stages.length}</span></div><div class="progress-line"><i style="width:${progress()}%"></i></div>${roundRibbon()}<div class="timeline">${stageRows()}</div></section>
+          <aside class="card agent-panel"><div class="agent-now"><div class="eyebrow">Agent 运行信封</div><div class="agent-state"><h3>${info.label}</h3><span class="pill ${info.class}">${st.label}</span></div><div class="thinking">${st.action}。所有外部动作都在执行前重新校验收件人、版本和当前控制状态。</div></div><div class="rail-list"><div class="rail-item"><div class="rail-k">等待对象</div><div class="rail-v">${st.wait}</div></div><div class="rail-item"><div class="rail-k">下一动作</div><div class="rail-v">${st.next}</div></div><div class="rail-item"><div class="rail-k">最晚升级</div><div class="rail-v">${st.human ? '距现在 ' + st.eta : '暂无需升级'}</div></div><div class="rail-item"><div class="rail-k">执行范围</div><div class="rail-v">只处理案件 AP-24081 · Epoch 1</div></div></div>${decisionBox()}</aside>
+          <section class="card output-card"><div class="card-head" style="padding:0 0 12px;border:0"><div><div class="card-title">最终交付件预览</div><div class="small">只有证据与必要人工确认齐备后才可就绪</div></div><span class="pill ${state.step === 7 ? 'good' : ''}">${state.step === 7 ? '已就绪' : '编译中'}</span>${state.step === 7 ? '<button class="btn primary tiny" data-action="open-package">打开正文</button>' : ''}</div><div class="output-grid"><div class="output-block ${state.step === 7 ? 'ready' : ''}"><div class="eyebrow">终面评估摘要</div><div class="strong" style="margin-top:7px">建议重点验证复杂项目商业化与跨团队推进能力</div></div><div class="output-block"><div class="eyebrow">证据</div><div class="strong" style="margin-top:7px">12 条可定位引用</div></div><div class="output-block"><div class="eyebrow">风险</div><div class="strong" style="margin-top:7px">2 项待终面验证</div></div><div class="output-block"><div class="eyebrow">人工确认</div><div class="strong" style="margin-top:7px">${state.step > 6 ? '2 / 2' : state.step > 2 ? '1 / 2' : '0 / 2'}</div></div></div></section></div></main></section></div>`;
+    }
+    function renderB() {
+      const info = statusInfo(); const st = stages[state.step];
+      return `${topNote()}<div class="b-shell"><header class="b-top"><div class="b-wordmark">HIRE / AGENT</div><div style="display:flex;align-items:center;gap:9px"><span class="pill ${info.class}"><span class="dot"></span>${info.label}</span><span class="small mono">AP-24081</span></div></header><main class="b-canvas"><section class="b-hero"><div><div class="eyebrow">林可欣 · AI 产品经理</div><h1>招聘中段，<br><span>交给 Agent 负责到底。</span></h1></div><div class="b-summary"><div class="eyebrow">当前任务</div><p>${st.action}。Agent 会自动推进可自主步骤，仅在招聘决定、评估确认和异常升级时把完整上下文交给人。</p><div class="b-controls">${commonControls(true)}</div></div></section>
+      <section class="b-map">${stages.map((x,i)=>`<div class="b-step ${stageStatus(i)}"><div class="b-no">0${i+1} / ${stepTime(i)}</div><h3>${x.label}</h3><p>${x.detail}</p></div>`).join('')}</section>${roundRibbon()}
+      <section class="b-detail"><div class="b-column"><div class="eyebrow">Agent 正在做</div><div class="b-big">${st.action}</div><div class="b-line"><span>边界</span><b>案件 AP-24081 · 生命周期 1</b></div><div class="b-line"><span>执行凭据</span><b>当前画像 v3 · 当前日程修订</b></div><div class="b-line"><span>模拟 / 真实</span><b>外部连接均为模拟</b></div></div><div class="b-column"><div class="eyebrow">运行节奏</div><div class="b-big">${st.wait === '无' ? '不等待，继续执行。' : '正在等待 ' + st.wait + '。'}</div><div class="b-line"><span>下次检查</span><b>${st.human ? '30 分钟后' : '执行完成后'}</b></div><div class="b-line"><span>最晚升级</span><b>${st.human ? st.eta : '无'}</b></div></div><div class="b-column"><div class="eyebrow">人的位置</div><div class="b-big">${st.human ? '现在需要人做决定。' : '此步无需人工启动。'}</div>${decisionBox('b-action')}</div></section>
+      <section class="b-final"><div><div class="eyebrow" style="color:#89918c">产品最终答案</div><h2>一份可以直接摆上终面评审桌的评估包。</h2><p class="small" style="color:#aeb6b1">不只是纪要，而是完整串联各轮证据、已确认结论、风险、未解问题和独立人工决策的不可变交付件。最终招聘决定仍由人作出，结果随后以来源事实回流画像治理，不由 Agent 直接改画像。</p>${state.step === 7 ? '<button class="btn accent" data-action="open-package" style="margin-top:12px">打开决策会视图</button>' : ''}</div><div class="b-final-list"><div class="b-final-item">01 · 候选人与岗位摘要</div><div class="b-final-item">02 · 各轮证据地图</div><div class="b-final-item">03 · 能力评分与引用</div><div class="b-final-item">04 · 风险与待验证项</div><div class="b-final-item">05 · 结果回流的来源事实入口</div></div></section></main></div>`;
+    }
+    function renderC() {
+      const info=statusInfo(); const st=stages[state.step];
+      return `${topNote()}<div class="c-shell"><header class="c-top"><div class="strong">Recruiting OS <span class="pill blue" style="margin-left:8px">Agent</span></div><div class="c-search">搜索候选人、岗位或异常…</div><div class="pill ${info.class}"><span class="dot"></span>${info.label}</div></header><div class="c-grid"><aside class="c-queue"><div class="queue-head"><div class="strong">正在处理</div><span class="small">24</span></div><div class="queue-card active"><div class="queue-top"><span class="queue-name">林可欣</span><span class="pill ${info.class}">${st.label}</span></div><div class="queue-meta">AI 产品经理 · 今天 09:02</div></div><div class="queue-card"><div class="queue-top"><span class="queue-name">张洋</span><span class="pill">等待选时</span></div><div class="queue-meta">高级后端工程师 · 12 分钟前</div></div><div class="queue-card"><div class="queue-top"><span class="queue-name">周正</span><span class="pill warn">等待确认</span></div><div class="queue-meta">视觉设计主管 · 34 分钟前</div></div><div class="queue-card muted-card"><div class="queue-top"><span class="queue-name">赵思远</span><span class="pill">会前准备</span></div><div class="queue-meta">数据分析师 · 明天 10:00</div></div></aside>
+      <main class="c-work"><div class="work-head"><div><div class="eyebrow">AP-24081 · 申请中</div><div class="work-title">林可欣 <span class="muted">— AI 产品经理</span></div><div class="small" style="margin-top:5px">匹配 86 · 上海 · 7 年经验 · 来源：招聘邮箱</div></div><div class="work-actions">${commonControls(false)}</div></div><div class="c-stagebar">${stages.map((x,i)=>`<div class="c-stage ${stageStatus(i)}"><div class="n">0${i+1}</div><div class="l">${x.label}</div></div>`).join('')}</div>${roundRibbon()}
+      <div class="c-workgrid"><section class="card work-card"><div class="eyebrow">当前案件状态</div><h3>${st.label}</h3><div class="fact-row"><span>Agent 动作</span><b>${st.action}</b></div><div class="fact-row"><span>等待对象</span><b>${st.wait}</b></div><div class="fact-row"><span>下一步</span><b>${st.next}</b></div><div class="fact-row"><span>安全边界</span><b>Tenant 01 · Case AP-24081 · Epoch 1</b></div>${decisionBox('c-decision')}</section>
+      <section class="card work-card"><div class="eyebrow">候选人信号</div><h3>证据先于结论</h3><div class="signal"><div><b>复杂项目推进</b><p>3 条项目经历支持，有可定位原文</p></div><span class="pill good">强</span></div><div class="signal"><div><b>AI 产品化能力</b><p>简历已覆盖，建议面试验证实际指标</p></div><span class="pill blue">中高</span></div><div class="signal"><div><b>商业化结果</b><p>缺少可核验收入或活跃指标</p></div><span class="pill warn">待验证</span></div></section></div></main>
+      <aside class="c-agent"><div class="agent-orb">H</div><div class="eyebrow">Agent Activity</div><h2>它现在在做什么</h2><p class="small">${st.action}。</p><div class="activity">${activityItems().map(x=>`<div class="activity-item ${x.current?'current':''}">${x.text}<div class="activity-time">${x.time}</div></div>`).join('')}</div><div style="margin-top:12px"><div class="eyebrow">能力真实性</div>${capability.map(x=>`<div class="small" style="padding:6px 0;border-bottom:1px solid #eceee9">${x}</div>`).join('')}</div></aside></div></div>`;
+    }
+    function renderSwitcher() {
+      const key=currentVariant(); const item=variants.find(v=>v.key===key);
+      return `<div class="switcher" aria-label="原型方案切换"><button data-action="prev-variant" aria-label="上一个方案">←</button><div class="switcher-label">${item.key} — ${item.name}</div><button data-action="next-variant" aria-label="下一个方案">→</button></div>`;
+    }
+    function render() {
+      const key=currentVariant();
+      document.getElementById('app').innerHTML=(key==='A'?renderA():key==='B'?renderB():renderC())+renderSwitcher()+packageModal();
+      bind();
+    }
+    function toast(message) { const el=document.getElementById('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('show'),1800); }
+    function advance(force=false) {
+      const info=statusInfo();
+      if (state.step>=stages.length-1) return;
+      if (!force && (info.blocked || stages[state.step].human)) return;
+      state.step++; state.inspected=state.step; render();
+      if (state.step===stages.length-1) { stopAuto(); toast('终面评估包已就绪'); }
+    }
+    function startAuto() {
+      if (state.auto) { stopAuto(); render(); return; }
+      state.auto=true; render();
+      state.timer=setInterval(()=>{
+        const info=statusInfo();
+        if (info.blocked || stages[state.step].human || state.step>=stages.length-1) { stopAuto(); render(); toast(info.blocked?'已在安全闸门处停止':'已在必要人工决策点停止'); return; }
+        advance();
+      }, 1200);
+    }
+    function stopAuto(){ state.auto=false; if(state.timer){clearInterval(state.timer);state.timer=null;} }
+    function reset(main=false){
+      stopAuto();
+      state.step=0; state.resolved=false; state.recovery=null; state.humanBranch=null; state.decisionTrail=[];
+      state.evaluationRevision=1; state.packageOpen=false; state.inspected=0;
+      if(main) state.scenario='normal';
+      render();
+    }
+    function cycleVariant(delta){
+      const key=currentVariant(); const i=variants.findIndex(v=>v.key===key);
+      state.variant=variants[(i+delta+variants.length)%variants.length].key;
+      const url=new URL(location.href); url.searchParams.set('variant',state.variant);
+      try { history.replaceState(null,'',url.href); } catch (_) {}
+      render();
+    }
+    function bind(){
+      document.querySelectorAll('[data-action]').forEach(el=>el.addEventListener('click',()=>{
+        const a=el.dataset.action;
+        if(a==='advance')advance(); if(a==='auto')startAuto(); if(a==='reset')reset(true);
+        if(a==='resolve'){
+          const route=recoveryRoutes[state.scenario];
+          state.resolved=true; state.recovery={...route,at:state.step};
+          render(); toast('恢复路线和检查点已记录');
+        }
+        if(a==='continue-recovery'){advance(true);toast('已从安全检查点继续');}
+        if(a==='human-confirm'){
+          const first=state.step===2;
+          state.decisionTrail.push({
+            label:first?'部门筛选决定：进入面试':`终面评估事实已确认 · v${state.evaluationRevision}`,
+            actor:first?'周岩 / Hiring Owner':'陈曦 / Interviewer', time:first?'09:08':'16:02'
+          });
+          state.humanBranch=null; toast('人工决定与版本已留痕'); advance(true);
+        }
+        if(a==='human-revise'){
+          const first=state.step===2;
+          if(!first) state.evaluationRevision+=1;
+          state.humanBranch={
+            at:state.step,
+            status:first?'已暂缓，等待补充材料':'评估已退回修改',
+            reason:first?'商业化指标证据不足':'结论 R3-04 缺少可定位原文引用',
+            checkpoint:first?'DEPARTMENT-DECISION / REV-1':`EVALUATION-R3 / REV-${state.evaluationRevision}`
+          };
+          state.decisionTrail.push({label:first?'部门决定：暂缓并补充证据':`评估退回修订 v${state.evaluationRevision}`,actor:first?'周岩 / Hiring Owner':'陈曦 / Interviewer',time:'刚刚'});
+          render(); toast(first?'暂缓理由已记录':'已创建新评估修订');
+        }
+        if(a==='resume-human'){state.humanBranch=null;render();toast('已返回当前人工决策任务');}
+        if(a==='open-package'){state.packageOpen=true;render();}
+        if(a==='close-package'){state.packageOpen=false;render();}
+        if(a==='prev-variant')cycleVariant(-1); if(a==='next-variant')cycleVariant(1);
+      }));
+      document.querySelectorAll('[data-action="scenario"]').forEach(el=>el.addEventListener('change',e=>{
+        stopAuto(); state.scenario=e.target.value; state.step=0; state.resolved=false; state.recovery=null;
+        state.humanBranch=null; state.decisionTrail=[]; state.evaluationRevision=1; state.packageOpen=false;
+        render(); toast('已切换演示场景');
+      }));
+    }
+    addEventListener('keydown',e=>{ if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)||document.activeElement?.isContentEditable)return; if(e.key==='Escape'&&state.packageOpen){state.packageOpen=false;render();return;} if(e.key==='ArrowLeft')cycleVariant(-1); if(e.key==='ArrowRight')cycleVariant(1); });
+    render();
+  </script>
+</body>
+</html>

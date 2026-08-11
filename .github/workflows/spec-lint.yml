@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check Python syntax
-        run: python3 -m py_compile contracts/lint_contracts.py contracts/lint_g1b_spec.py contracts/lint_g2_spec.py contracts/lint_g3_spec.py
+        run: python3 -m compileall -q contracts runtime
 
       - name: Check JSON syntax
         run: jq empty contracts/*.schema.json
@@ -33,3 +33,12 @@ jobs:
 
       - name: Check G3 product specification
         run: python3 contracts/lint_g3_spec.py
+
+      - name: Check G1a synthetic control behavior
+        run: python3 -m unittest discover -s runtime/tests -v
+
+      - name: Run deterministic G1a synthetic scenario
+        run: python3 runtime/run_synthetic_g1a.py
+
+      - name: Check product-shape prototype
+        run: node prototype/check_demo.mjs
