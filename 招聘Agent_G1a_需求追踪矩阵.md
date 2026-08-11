@@ -1,7 +1,7 @@
 # 招聘 Agent G1a 需求追踪矩阵
 
-> 版本：v0.1  
-> 日期：2026-08-10  
+> 版本：v0.2<br>
+> 日期：2026-08-11<br>
 > 基线：[G1a MVP PRD](./招聘Agent_G1_MVP_PRD.md)  
 > 口径：`SPEC` 只表示需求已映射到接口、Backlog 和目标测试；没有实现与运行证据时不得标 `DONE`。
 
@@ -15,7 +15,7 @@
 | `VERIFIED` | 目标环境运行证据、负面/竞态测试和 Owner 验收齐全 |
 | `RELEASED` | 对应动作通过离线/A0/A1 的发布门并有回滚演练 |
 
-证据 ID 均为待实现仓库产生的槽位，不是现有证据。每个槽位必须最终链接到不可变 CI run、测试报告、审计导出或签字记录。
+证据 ID 默认为待实现槽位。只有 `EV-FR019`、`EV-FR022` 和 `EV-AT009` 已绑定到 [commit `ab8cf20`](https://github.com/shandianT/hr/commit/ab8cf205e297357fb8ee8555ebe3a3316f17b82e)、[CI run 31452559339](https://github.com/shandianT/hr/actions/runs/31452559339) 与完整行为测试。`SYNTHETIC_ONLY` 是证据范围限定，不是高于 `IMPLEMENTED` 的生命周期状态。
 
 ## 2. FR-001..032
 
@@ -39,10 +39,10 @@
 | FR-016 | 安全失败不可静默删后发布 | Validator + ExceptionBundle | G1A-015,033,034 | `BT-VALIDATE-001`：失败保留原因并开包；`EV-FR016` | SPEC |
 | FR-017 | 每会话唯一确认责任人 | Review Policy | G1A-040,043 | `BT-OWNER-001`：多人评论不产生多生效版；`EV-FR017` | SPEC |
 | FR-018 | 修改生成新版本/diff/作者/原因 | Evaluation / `ReviseEvaluation` | G1A-042 | `BT-REVISION-001`：历史不可覆盖；`EV-FR018` | SPEC |
-| FR-019 | 评价确认与轮次决定独立 | Round / review + decision commands | G1A-043,044 | `BT-SEPARATION-001`：确认后仍 AWAITING_OUTCOME；`EV-FR019` | SPEC |
+| FR-019 | 评价确认与轮次决定独立 | Round / review + decision commands | G1A-043,044 | `test_completed_session_reaches_immutable_round_archive_only_after_human_decision` + HUMAN/SERVICE 权限负例；`EV-FR019` / E-032 | IMPLEMENTED |
 | FR-020 | 并发确认使用版本校验 | Control + Evaluation | G1A-012,042 | `CT-VERSION-001`：后提交返回冲突；`EV-FR020` | SPEC |
 | FR-021 | 未确认不得完成，豁免可审计 | Round completion gate | G1A-043,045 | `BT-ARCHIVE-001`：缺确认拒绝；豁免需 actor/reason/time；`EV-FR021` | SPEC |
-| FR-022 | 归档钉住确认版/决定版/证据版 | Round / `RecordRoundDecision` | G1A-045 | `BT-ARCHIVE-002`：不可变 manifest 且无 G1b 包；`EV-FR022` | SPEC |
+| FR-022 | 归档钉住确认版/决定版/证据版 | Round / `RecordRoundDecision` | G1A-045 | 正常链 + archive hash 版本变化 + 确认后迟到证据拒绝测试；`EV-FR022` / E-032 | IMPLEMENTED |
 | FR-023 | 策略化提醒、静默、上限、升级、幂等 | ActionExecutor / `RequestReminder` | G1A-016,050 | `CT-REMINDER-001`：同 ordinal 仅一外发；`EV-FR023` | SPEC |
 | FR-024 | 异常包含事实/风险/尝试/选项/建议/Owner/期限 | ExceptionBundle | G1A-015 | `CT-EXCEPTION-001`：Schema + HR 可恢复演练；`EV-FR024` | SPEC |
 | FR-025 | 每任务定义重试/不可重试/人工恢复 | Worker + ActionExecutor | G1A-015,016,024,031 | `BT-RECOVERY-001`：授权缺失不按模型失败重试；`EV-FR025` | SPEC |
@@ -66,7 +66,7 @@
 | AT-006 | 无证据负面结论被阻断并记录失败 | G1A-033 | validator/red-team | `EV-AT006` | SPEC |
 | AT-007 | 婚育/健康无关信息不进评价并触发复核 | G1A-034 | compliance/red-team | `EV-AT007` | SPEC |
 | AT-008 | 两人编辑同版，后者冲突且不覆盖 | G1A-012,042 | concurrency/API | `EV-AT008` | SPEC |
-| AT-009 | 确认评价不自动推进，仍待人类决定 | G1A-043,044 | state-machine/API | `EV-AT009` | SPEC |
+| AT-009 | 确认评价不自动推进，仍待人类决定 | G1A-043,044 | state-machine/API | `test_completed_session_reaches_immutable_round_archive_only_after_human_decision` + 决定权限负例；`EV-AT009` / E-032 | IMPLEMENTED |
 | AT-010 | 当前轮归档，但不生成终面包/全案就绪事件 | G1A-045 | event assertion/API | `EV-AT010` | SPEC |
 | AT-011 | 暂停后队列提醒在执行点被阻断 | G1A-014,016,050 | race/connector mock | `EV-AT011` | SPEC |
 | AT-012 | 模型超时重试耗尽：异常/接管，不重复媒体 | G1A-015,021,031,051 | fault injection | `EV-AT012` | SPEC |
@@ -92,8 +92,7 @@ PRD 的单个 FR/AT 之外，以下必须作为发布门复用到所有命令：
 
 | 项 | 基线 | 已映射 | 已实现 | 已验证 | 已发布 |
 |---|---:|---:|---:|---:|---:|
-| FR | 32 | 32 | 0 | 0 | 0 |
-| AT | 15 | 15 | 0 | 0 | 0 |
+| FR | 32 | 32 | 2 | 0 | 0 |
+| AT | 15 | 15 | 1 | 0 | 0 |
 
-当前成果是把“32 项功能 + 15 个验收”从散文变成可领取、可测试、可挂证据的工作图。**覆盖率 100% 不等于实现率；当前实现率仍为 0%。**
-
+当前成果是把“32 项功能 + 15 个验收”变成可领取、可测试、可挂证据的工作图，并用合成运行证据完整实现 FR 2 项、AT 1 项。剩余 FR 30 项、AT 14 项仍为 `SPEC`；全部 `VERIFIED/RELEASED` 仍为 0。**40 个测试通过不等于 40 项需求已实现。**

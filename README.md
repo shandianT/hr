@@ -6,17 +6,18 @@
 
 ## 当前真实状态
 
-- 产品与控制规格：G1a、G1b 已有规格验收；G2 的 64 FR/28 AT 已通过结构一致性验收；G3 的 60 FR/30 AT 已形成多源结果对账、冻结候选与确认性评测、D0–D4 发布资格、双人批准、独立授权、两阶段未来发布与回滚的产品规格，工程/数据/实验/发布仍为 0。
-- 规格 CI：[GitHub Actions `spec-lint`](https://github.com/shandianT/hr/actions/runs/31377439927) 已在 commit `c0649ef` 通过；它只证明仓库内文档、契约与追踪结构一致，不证明运行功能。
-- 交互设计：旧逻辑原型 7 个合成场景、63 项检查通过，但用户已否定其交互设计；已交付新原型设计任务书，尚无新原型。
-- 工程实现、真实集成、真实数据运行：尚无完成证据。
+- 产品与控制规格：G1a、G1b 已有规格验收；G2 的 64 FR/28 AT 已通过结构一致性验收；G3 的 60 FR/30 AT 已形成多源结果对账、冻结候选与确认性评测、D0–D4 发布资格、双人批准、独立授权、两阶段未来发布与回滚的产品规格；G2/G3 工程/验证/发布仍为 0。
+- 产品 Demo：[新产品形态 Demo](./prototype/招聘Agent_产品形态Demo_v1.html) 已可点击跑完合成主线，支持 A/B/C 同状态切换、两个必要人工闸门、三个异常恢复分支和可打开的三轮终面评估包；尚无真人任务或真实集成证据。
+- G1a 运行实现：面后最短闭环已形成本地合成控制内核，40 个行为测试与固定场景可重复运行，精确状态为 `IMPLEMENTED / SYNTHETIC_ONLY`。
+- 当前 CI：[`spec-lint` run 31452559339](https://github.com/shandianT/hr/actions/runs/31452559339) 已在 commit `ab8cf20` 通过，覆盖 4 套规格检查、40 个 runtime 行为测试、合成正常链和 Demo 静态交互检查。
+- 真实集成、真实数据、模型质量、真人使用与生产发布：尚无完成证据。
 - 发布结论：**No-go**。当前仅允许合成/匿名化数据、沙箱验证和治理准备，不得连接真实邮箱、日历、会议或对候选人执行外部写操作。
 
 ## 产品分段
 
 | 分段 | 范围 | 当前产物 |
 |---|---|---|
-| G1a | 单轮面试后：证据、纪要、评估、确认、人工轮次决策、归档 | PRD、工程开工包、契约、追踪矩阵 |
+| G1a | 单轮面试后：证据、纪要、评估、确认、人工轮次决策、归档 | PRD、工程开工包、契约、追踪矩阵、合成控制内核与 40 个行为测试 |
 | G1b | 多轮串联：追问清单、轮次依赖、终面评估包、失效与重编译 | PRD、追踪矩阵、规格验收记录 |
 | G2 | 简历接入至可信面试交接：解析、路由、匹配、部门决定、约面、采集闸门、G1 交接 | PRD、领域规格、追踪矩阵；实现/验证/发布为 0 |
 | G3 | 结果回流与画像治理：多源对账、标注成熟、固定 Cohort、预研究冻结候选、确认性评测、发布资格、双人批准、授权与两阶段未来发布、冻结/回滚 | PRD、ADR-0009、领域规格、追踪矩阵与静态验收；IMPLEMENTED/VERIFIED/RELEASED=0，真实数据与画像发布 No-go |
@@ -35,6 +36,9 @@
 - [G3 需求追踪矩阵](./招聘Agent_G3_需求追踪矩阵.md)
 - [G3 产品规格验收记录](./招聘Agent_G3_产品规格验收记录.md)
 - [Hermes 式 Agent 与 UI 设计原则](./docs/招聘Agent_Hermes式Agent与UI设计原则.md)
+- [可点击产品形态 Demo](./prototype/招聘Agent_产品形态Demo_v1.html)
+- [G1a 合成控制面运行说明](./runtime/README.md)
+- [G1a 合成控制面与产品 Demo 验收记录](./招聘Agent_G1a合成控制面与产品Demo验收记录.md)
 - [新原型设计任务书](./交付/Claude原型设计任务书.md)
 - [控制塔逻辑原型](./招聘Agent控制塔_逻辑原型.html)
 - [架构决策记录](./docs/adr/)
@@ -57,6 +61,9 @@ python3 contracts/lint_contracts.py
 python3 contracts/lint_g1b_spec.py
 python3 contracts/lint_g2_spec.py
 python3 contracts/lint_g3_spec.py
+python3 -m unittest discover -s runtime/tests -v
+python3 runtime/run_synthetic_g1a.py
+node prototype/check_demo.mjs
 ```
 
-校验通过只说明对应规格的一致性检查通过；不能替代工程测试、集成验收、安全评估、合规审查或真实业务成效。
+规格检查只证明文档/契约一致；runtime 测试只证明当前合成子集的行为。它们都不能替代真实集成验收、模型评测、安全评估、合规审查、真人任务或真实业务成效。

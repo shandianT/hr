@@ -2,7 +2,7 @@
 
 版本：v0.1
 日期：2026-08-11
-状态：实现完成，待线上 CI 证据
+状态：实现完成；[GitHub Actions run 31452559339](https://github.com/shandianT/hr/actions/runs/31452559339) 已通过；证据边界为 `IMPLEMENTED / SYNTHETIC_ONLY`
 
 ## 1. Goal
 
