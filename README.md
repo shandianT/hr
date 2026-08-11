@@ -9,7 +9,7 @@
 - 产品与控制规格：G1a、G1b 已有规格验收；G2 的 64 FR/28 AT 已通过结构一致性验收；G3 的 60 FR/30 AT 已形成多源结果对账、冻结候选与确认性评测、D0–D4 发布资格、双人批准、独立授权、两阶段未来发布与回滚的产品规格；G2/G3 工程/验证/发布仍为 0。
 - 产品 Demo：[新产品形态 Demo](./prototype/招聘Agent_产品形态Demo_v1.html) 已可点击跑完合成主线；另有三个低理解成本的独立切片，分别展示[简历收件](./prototype/招聘Agent_核心功能1_简历收件Demo.html)、[简历筛选与部门决定](./prototype/招聘Agent_核心功能2_画像匹配与部门决定Demo.html)和[候选人约面](./prototype/招聘Agent_核心功能3_候选人约面Demo.html)。尚无真人任务或真实集成证据。
 - 运行实现：收件、筛选/部门决定、候选人约面和 G1a 面后归档已有边界明确的本地合成纵切，当前 117 个行为测试与固定 runner 可重复运行，精确状态为 `IMPLEMENTED / SYNTHETIC_ONLY` 子集；G2 矩阵不因此升级。
-- 当前已发布 CI：[`spec-lint` run 31460327366](https://github.com/shandianT/hr/actions/runs/31460327366) 已覆盖到核心功能 2；核心功能 3 当前只有本地 117 / 117 通过证据，待本轮推送后的同提交 GitHub runner 补证。
+- 当前 CI：[`spec-lint` run 31463159475](https://github.com/shandianT/hr/actions/runs/31463159475) 已在 Core3 实现 commit `5c1e979` 通过，覆盖四套规格检查、117 条 runtime 行为测试、四个合成 runner 和四个 Demo 检查。
 - 真实集成、真实数据、模型质量、真人使用与生产发布：尚无完成证据。
 - 发布结论：**No-go**。当前仅允许合成/匿名化数据、沙箱验证和治理准备，不得连接真实邮箱、日历、会议或对候选人执行外部写操作。
 

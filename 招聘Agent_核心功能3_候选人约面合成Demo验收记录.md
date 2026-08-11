@@ -64,8 +64,9 @@
 | `python3 runtime/run_synthetic_scheduling.py` | PASS | selection 非 Booking、三回执后唯一 Booking、响应丢失先对账、Notice 不产生 Consent、真实外部效果 0 |
 | `node prototype/check_scheduling_demo.mjs` | PASS | 十二危险场景、独立状态机、XSS/移动断言；不代替真人可用性 |
 | 本地浏览器复验 | PASS | 桌面端已实际点击正常链、不录制路线与改期保护；390px 无横向溢出，仍不代替真人任务、读屏或视觉定稿 |
+| [GitHub `spec-lint` run 31463159475](https://github.com/shandianT/hr/actions/runs/31463159475) | PASS | Core3 实现 commit `5c1e979`：四套规格检查、117 条 runtime 行为测试、四个 runner 和四个 Demo 检查 |
 
-这些是当前本地快照；在相同提交的线上 CI 完成前，不表述为 GitHub runner 证据。
+上述 GitHub runner 证据只证明该实现提交在固定合成输入下可重复通过，不证明目标环境、真实连接器、真人任务或发布。
 
 ## 5. 当前不能证明什么
 
