@@ -25,6 +25,9 @@ for (const requiredToken of [
   "各轮结论与证据地图",
   "data-action=\"open-package\"",
   "state.variant=variants",
+  "返回 Hiring Owner 决策",
+  "FINAL ASSESSMENT PACKAGE / REV ${state.evaluationRevision}",
+  "state.recovery.acknowledged=true",
 ]) {
   if (!source.includes(requiredToken)) {
     throw new Error(`prototype token is missing: ${requiredToken}`);

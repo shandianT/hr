@@ -377,7 +377,7 @@
     function decisionBox(style = '') {
       const info = statusInfo();
       const s = scenarioCopy[state.scenario];
-      if (state.recovery && state.recovery.at === state.step) return `<div class="${style || 'decision-box'}"><div class="eyebrow">恢复记录 · APPLIED</div><div class="strong" style="margin-top:7px">${state.recovery.route}</div><div class="small" style="margin-top:6px">${state.recovery.note}</div><div class="small mono" style="margin-top:7px">检查点 ${state.recovery.checkpoint} · 重试 0</div><div class="decision-actions"><button class="btn primary tiny" data-action="continue-recovery">从检查点继续</button><button class="btn tiny" data-action="reset">返回主线</button></div></div>`;
+      if (state.recovery && state.recovery.at === state.step && !state.recovery.acknowledged) return `<div class="${style || 'decision-box'}"><div class="eyebrow">恢复记录 · APPLIED</div><div class="strong" style="margin-top:7px">${state.recovery.route}</div><div class="small" style="margin-top:6px">${state.recovery.note}</div><div class="small mono" style="margin-top:7px">检查点 ${state.recovery.checkpoint} · 重试 0</div><div class="decision-actions"><button class="btn primary tiny" data-action="continue-recovery">${state.scenario === 'overdue' ? '返回 Hiring Owner 决策' : '从检查点继续'}</button><button class="btn tiny" data-action="reset">返回主线</button></div></div>`;
       if (info.blocked) return `<div class="${style || 'decision-box'}"><div class="eyebrow">异常分支</div><div class="strong" style="margin-top:7px">${s.title}</div><div class="small" style="margin-top:6px">${s.body}</div><div class="decision-actions"><button class="btn primary tiny" data-action="resolve">按安全路线继续</button><button class="btn tiny" data-action="reset">返回主线</button></div></div>`;
       if (state.humanBranch && state.humanBranch.at === state.step) return `<div class="${style || 'decision-box'}"><div class="eyebrow">人工分支已留痕</div><div class="strong" style="margin-top:7px">${state.humanBranch.status}</div><div class="small" style="margin-top:6px">原因：${state.humanBranch.reason}</div><div class="small mono" style="margin-top:7px">检查点 ${state.humanBranch.checkpoint}</div><div class="decision-actions"><button class="btn primary tiny" data-action="resume-human">${state.step === 2 ? '补充完成，返回决策' : `打开评估修订 v${state.evaluationRevision}`}</button></div></div>`;
       if (!stages[state.step].human) return '';
@@ -408,7 +408,7 @@
         ? state.decisionTrail.map(x => `<li>${x.label} · ${x.actor} · ${x.time}</li>`).join('')
         : '<li>本次预览未记录人工决定</li>';
       return `<div class="package-backdrop"><article class="package-modal" role="dialog" aria-modal="true" aria-labelledby="package-title">
-        <header class="package-top"><div><div class="eyebrow" style="color:#aeb6b1">合成样例 · FINAL ASSESSMENT PACKAGE / REV 1</div><h2 id="package-title">林可欣 — AI 产品经理</h2></div><button class="btn tiny" data-action="close-package">关闭</button></header>
+        <header class="package-top"><div><div class="eyebrow" style="color:#aeb6b1">合成样例 · FINAL ASSESSMENT PACKAGE / REV ${state.evaluationRevision}</div><h2 id="package-title">林可欣 — AI 产品经理</h2></div><button class="btn tiny" data-action="close-package">关闭</button></header>
         <div class="package-body"><section class="package-summary"><div><div class="eyebrow">终面评审摘要</div><div class="package-lead" style="margin-top:8px">可进入最终招聘决策会；建议人工重点权衡商业化结果的可验证性。</div><p class="small">这是评估准备产物，不是录用或淘汰决定。最终招聘决定仍由有权人员作出。</p></div><div class="package-facts"><div class="package-fact"><div class="eyebrow">画像匹配</div><b>86 / 100 · v3</b></div><div class="package-fact"><div class="eyebrow">证据引用</div><b>12 条可定位</b></div><div class="package-fact"><div class="eyebrow">面试轮次</div><b>3 / 3 已确认</b></div><div class="package-fact"><div class="eyebrow">未解问题</div><b>2 项</b></div></div></section>
         <section class="package-section"><h3>各轮结论与证据地图</h3><table class="round-table"><thead><tr><th>轮次</th><th>核心结论</th><th>证据</th><th>风险 / 追问</th><th>确认</th></tr></thead><tbody>
           <tr><td><b>一面</b><br>业务面</td><td>能将模糊需求拆成可验证路径，跨团队推进证据完整。</td><td><span class="evidence-ref">R1-E03</span> <span class="evidence-ref">CV-P12</span></td><td>继续核验产品结果与个人贡献的边界。</td><td>王楠 · 14:08</td></tr>
@@ -501,7 +501,13 @@
           state.resolved=true; state.recovery={...route,at:state.step};
           render(); toast('恢复路线和检查点已记录');
         }
-        if(a==='continue-recovery'){advance(true);toast('已从安全检查点继续');}
+        if(a==='continue-recovery'){
+          if(state.scenario==='overdue'&&state.step===2){
+            state.recovery.acknowledged=true; render(); toast('升级事实包已留痕，仍需 Hiring Owner 决定');
+          } else {
+            advance(true); toast('已从安全检查点继续');
+          }
+        }
         if(a==='human-confirm'){
           const first=state.step===2;
           state.decisionTrail.push({
