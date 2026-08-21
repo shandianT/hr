@@ -7,13 +7,15 @@ flowchart BT
         M1[1 简历统一进入飞书<br/>官网直投 / 人工上传<br/>飞书是唯一人才档案源]:::feishu
         M2[2 飞书只读 API<br/>权限・读取・标准化<br/>负责人待明确]:::unassigned
         M3[3–5 项目负责人<br/>简历自动筛选评估<br/>JD 画像・证据・规则评分]:::core
-        M4[6 新源<br/>HR 工作台 UI 层<br/>列表・详情・确认纠错]:::ui
+        M4A[6a 新源 UI 创作区<br/>今日复核・列表・详情<br/>证据原文・视觉・交互]:::ui
+        M4B[6b UI 固定约束<br/>确认纠错・异常状态<br/>角色权限・提交回执]:::uiBoundary
         M5[7 HR 最终人工复核<br/>不自动淘汰或推进阶段]:::human
 
         M1 --> M2
         M2 -->|统一候选人快照| M3
-        M3 -->|可解释筛选结果| M4
-        M4 --> M5
+        M3 -->|ReviewCandidate| M4A
+        M4A -->|受控创作| M4B
+        M4B -->|HRReviewCommand| M5
     end
 
     subgraph BossSpike[BOSS 自动化测试支线｜周玮｜不阻塞 V1｜SPIKE_ONLY]
@@ -37,6 +39,7 @@ flowchart BT
     classDef unassigned fill:#FEF3C7,stroke:#D97706,color:#78350F,stroke-width:3px,stroke-dasharray: 6 4;
     classDef core fill:#F0FDF4,stroke:#16A34A,color:#14532D,stroke-width:2px;
     classDef ui fill:#ECFDF5,stroke:#059669,color:#064E3B,stroke-width:2px;
+    classDef uiBoundary fill:#F0FDFA,stroke:#0F766E,color:#134E4A,stroke-width:3px,stroke-dasharray: 6 4;
     classDef human fill:#FFF1F2,stroke:#E11D48,color:#881337,stroke-width:3px;
     classDef experiment fill:#FFF7ED,stroke:#F97316,color:#7C2D12,stroke-width:2px,stroke-dasharray: 6 4;
     classDef decision fill:#FFEDD5,stroke:#EA580C,color:#7C2D12,stroke-width:3px;
