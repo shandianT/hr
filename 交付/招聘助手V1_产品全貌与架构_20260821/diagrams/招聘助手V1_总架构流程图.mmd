@@ -1,0 +1,47 @@
+---
+title: 招聘助手 V1｜产品流程与当前三人分工
+---
+flowchart BT
+    subgraph Main[正式主链路｜必须交付]
+        direction LR
+        M1[1 简历统一进入飞书<br/>官网直投 / 人工上传<br/>飞书是唯一人才档案源]:::feishu
+        M2[2 飞书只读 API<br/>权限・读取・标准化<br/>负责人待明确]:::unassigned
+        M3[3–5 项目负责人<br/>简历自动筛选评估<br/>JD 画像・证据・规则评分]:::core
+        M4[6 新源<br/>HR 工作台 UI 层<br/>列表・详情・确认纠错]:::ui
+        M5[7 HR 最终人工复核<br/>不自动淘汰或推进阶段]:::human
+
+        M1 --> M2
+        M2 -->|统一候选人快照| M3
+        M3 -->|可解释筛选结果| M4
+        M4 --> M5
+    end
+
+    subgraph BossSpike[BOSS 自动化测试支线｜周玮｜不阻塞 V1｜SPIKE_ONLY]
+        direction LR
+        E1[E1 授权测试账号<br/>范围・样例・时间盒]:::experiment
+        E2[E2–E5 自动化测试<br/>登录・检索・自动打招呼<br/>识别・抓取・下载简历信息]:::experiment
+        E3{能否稳定实现？}:::decision
+        E4[E6–E7 测试进入飞书并输出结论<br/>可行 / 有条件可行 / 不可行<br/>或保留人工下载上传]:::report
+
+        E1 --> E2
+        E2 --> E3
+        E3 -->|带证据得出结论| E4
+    end
+
+    Future[未来 AI Native<br/>Agent 编排已验证工具<br/>仍经过飞书事实源和 HR 人工闸门]:::future
+
+    E4 -.->|无论自动或人工<br/>简历都先进入飞书| M1
+    Future -.->|逐步演进，不改变 1–7 顺序| M3
+
+    classDef feishu fill:#DBEAFE,stroke:#1D4ED8,color:#1E3A8A,stroke-width:4px;
+    classDef unassigned fill:#FEF3C7,stroke:#D97706,color:#78350F,stroke-width:3px,stroke-dasharray: 6 4;
+    classDef core fill:#F0FDF4,stroke:#16A34A,color:#14532D,stroke-width:2px;
+    classDef ui fill:#ECFDF5,stroke:#059669,color:#064E3B,stroke-width:2px;
+    classDef human fill:#FFF1F2,stroke:#E11D48,color:#881337,stroke-width:3px;
+    classDef experiment fill:#FFF7ED,stroke:#F97316,color:#7C2D12,stroke-width:2px,stroke-dasharray: 6 4;
+    classDef decision fill:#FFEDD5,stroke:#EA580C,color:#7C2D12,stroke-width:3px;
+    classDef report fill:#FFFBEB,stroke:#D97706,color:#78350F,stroke-width:2px,stroke-dasharray: 6 4;
+    classDef future fill:#F8FAFC,stroke:#64748B,color:#475569,stroke-width:2px,stroke-dasharray: 6 4;
+
+    style Main fill:#F8FAFC,stroke:#64748B,stroke-width:2px
+    style BossSpike fill:#FFF7ED,stroke:#F97316,stroke-width:2px,stroke-dasharray: 8 5
